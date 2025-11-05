@@ -37,14 +37,14 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
 
   return (
     <div 
-      className="min-h-screen p-6"
+      className="min-h-screen p-4 flex flex-col"
       style={{
         background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
       }}
     >
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto w-full flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <button onClick={onBack} className="p-2" style={{ color: '#EFEFEF' }}>
             <ChevronLeft className="w-6 h-6" />
           </button>
@@ -57,11 +57,11 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
           ref={posterRef}
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="rounded-2xl overflow-hidden mb-6"
+          className="rounded-2xl overflow-hidden mb-3 flex-1"
           style={{
-            aspectRatio: '9/16',
             background: '#FFFFFF',
             boxShadow: '0 12px 48px rgba(0, 0, 0, 0.5)',
+            minHeight: 0,
           }}
         >
           <div className="h-full flex flex-col p-6 relative">
@@ -105,7 +105,7 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
                 <div className="flex items-center justify-center gap-2">
                   <div className="flex items-center gap-1 px-3 py-1 rounded" style={{ backgroundColor: 'rgba(0, 184, 148, 0.1)', border: '1px solid rgba(0, 184, 148, 0.3)' }}>
                     <Star className="w-3 h-3" style={{ color: '#00B894' }} fill="#00B894" />
-                    <span style={{ color: '#00B894', fontSize: '12px' }}>{userStats.currentRank} {userStats.rankStars}星</span>
+                    <span style={{ color: '#00B894', fontSize: '12px' }}>{userStats.currentRank} <span style={{ fontWeight: 'bold' }}>{userStats.rankStars}</span>星</span>
                   </div>
                 </div>
               </div>
@@ -129,7 +129,7 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
                   <div style={{ color: '#888888', fontSize: '13px', marginBottom: '6px' }}>
                     已坚持戒烟
                   </div>
-                  <div style={{ color: '#00B894', fontSize: '48px', lineHeight: '1' }}>
+                  <div style={{ color: '#00B894', fontSize: '48px', fontWeight: '900', lineHeight: '1' }}>
                     {userStats.totalDays}
                   </div>
                   <div style={{ color: '#141414', fontSize: '16px', marginTop: '4px' }}>
@@ -140,12 +140,12 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
                 <div className="border-t pt-3" style={{ borderColor: 'rgba(0, 184, 148, 0.2)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <span style={{ color: '#888888', fontSize: '13px' }}>累计节省</span>
-                    <span style={{ color: '#00B894', fontSize: '18px' }}>{userStats.moneySaved} 元</span>
+                    <span style={{ color: '#00B894', fontSize: '18px', fontWeight: 'bold' }}>{userStats.moneySaved} 元</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span style={{ color: '#888888', fontSize: '13px' }}>相当于</span>
                     <span style={{ color: '#00B894', fontSize: '15px' }}>
-                      {userStats.equivalentItem} {userStats.equivalentCount} {userStats.equivalentUnit}
+                      {userStats.equivalentItem} <span style={{ fontWeight: 'bold' }}>{userStats.equivalentCount}</span> {userStats.equivalentUnit}
                     </span>
                   </div>
                 </div>
@@ -197,10 +197,10 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
         </motion.div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 flex-shrink-0">
           <Button
             onClick={handleDownload}
-            className="h-14 rounded-xl"
+            className="h-12 rounded-xl"
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               border: '1px solid rgba(189, 189, 189, 0.5)',
@@ -212,7 +212,7 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
           </Button>
           <Button
             onClick={handleShare}
-            className="h-14 rounded-xl"
+            className="h-12 rounded-xl"
             style={{
               backgroundColor: '#00B894',
               color: '#1a1a1a',

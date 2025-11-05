@@ -109,7 +109,7 @@ export default function AchievementsPage({
               ))}
             </div>
             <div style={{ color: '#888888', fontSize: '13px', marginTop: '8px' }}>
-              {totalDays} 天 · {RANK_SYSTEM[currentRankIndex]?.period}
+              <span style={{ fontWeight: 'bold' }}>{totalDays}</span> 天 · {RANK_SYSTEM[currentRankIndex]?.period}
             </div>
           </div>
 
@@ -117,7 +117,7 @@ export default function AchievementsPage({
             <div className="mt-6 pt-4" style={{ borderTop: '1px solid rgba(189, 189, 189, 0.2)' }}>
               <div className="flex items-center justify-between mb-2" style={{ fontSize: '13px' }}>
                 <span style={{ color: '#888888' }}>距离 {nextRank.rank}</span>
-                <span style={{ color: '#00B894' }}>{nextRank.minDays - totalDays} 天</span>
+                <span style={{ color: '#00B894', fontWeight: 'bold' }}>{nextRank.minDays - totalDays} 天</span>
               </div>
               <Progress value={progress} className="h-2" />
             </div>
@@ -189,8 +189,8 @@ export default function AchievementsPage({
                       </div>
                     </div>
                   </div>
-                  <div style={{ color: '#888888', fontSize: '11px', lineHeight: '1.3' }}>
-                    第{rank.minDays}-{rank.maxDays} 天<br />
+                  <div style={{ color: '#888888', fontSize: '11px', lineHeight: '1.3', textAlign: 'center' }}>
+                    第<span style={{ fontWeight: 'bold' }}>{rank.minDays}</span>-<span style={{ fontWeight: 'bold' }}>{rank.maxDays}</span> 天<br />
                     {rank.period}
                   </div>
                 </motion.div>

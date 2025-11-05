@@ -126,6 +126,10 @@
 
   body {
     @apply bg-background text-foreground;
+    /* 中文黑体字体栈 */
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "SimHei", "Heiti SC", sans-serif;
+    /* 使用等宽数字 */
+    font-variant-numeric: tabular-nums;
   }
 }
 

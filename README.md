@@ -1,7 +1,7 @@
 
-  # zxo
+  # zxo ai
 
-  This is a code bundle for zxo. The original project is available at https://www.figma.com/design/Phzrbo6epcaF3gFXCTTfiN/zxo.
+  This is a code bundle for zxo ai. The original project is available at https://www.figma.com/design/Phzrbo6epcaF3gFXCTTfiN/zxo-ai.
 
   ## Running the code
 

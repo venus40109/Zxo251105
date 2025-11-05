@@ -15,7 +15,7 @@ export default function FirstTimeSetup({ onComplete, onClose }: FirstTimeSetupPr
   const [smokingYears, setSmokingYears] = useState('');
   const [dailyAmount, setDailyAmount] = useState('');
   const [pricePerPack, setPricePerPack] = useState('');
-  const [cigarettesPerPack, setCigarettesPerPack] = useState('20'); // 默认20支
+  const [cigarettesPerPack, setCigarettesPerPack] = useState('');
 
   const isFormValid = () => {
     return (

@@ -62,7 +62,8 @@ export default function SplashScreen() {
               color: '#EFEFEF',
               fontSize: '36px',
               fontWeight: 'bold',
-              letterSpacing: '2px'
+              letterSpacing: '2px',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "SimHei", "Heiti SC", sans-serif'
             }}
           >
             ZXO

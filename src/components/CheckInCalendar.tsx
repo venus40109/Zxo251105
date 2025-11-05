@@ -32,6 +32,7 @@ export default function CheckInCalendar({
   const [showMakeupDialog, setShowMakeupDialog] = useState(false);
   const [showChallengeDialog, setShowChallengeDialog] = useState(false);
   const [selectedChallenge, setSelectedChallenge] = useState<number | null>(null);
+  const [activeChallenges, setActiveChallenges] = useState<number[]>([]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -103,9 +104,10 @@ export default function CheckInCalendar({
   };
 
   const handleConfirmChallenge = () => {
-    // 设置挑战目标逻辑
+    if (selectedChallenge) {
+      setActiveChallenges([...activeChallenges, selectedChallenge]);
+    }
     setShowChallengeDialog(false);
-    // 这里可以添加设置目标的逻辑
   };
 
   // 获取当前段位的打卡提示语
@@ -150,7 +152,7 @@ export default function CheckInCalendar({
           transition={{ duration: 0.5 }}
         >
           <Flame className="w-12 h-12 mx-auto mb-3" style={{ color: '#00B894' }} />
-          <div style={{ color: '#00B894', fontSize: '48px', fontWeight: 'bold', lineHeight: 1 }}>
+          <div style={{ color: '#00B894', fontSize: '48px', fontWeight: '900', lineHeight: 1 }}>
             {consecutiveDays}
           </div>
           <div style={{ color: '#EFEFEF', marginTop: '8px' }}>连续打卡天数</div>
@@ -163,7 +165,7 @@ export default function CheckInCalendar({
             <div className="flex items-center justify-center gap-2">
               <Ticket className="w-5 h-5" style={{ color: '#00B894' }} />
               <span style={{ color: '#EFEFEF' }}>补签卡</span>
-              <span style={{ color: '#00B894', fontSize: '20px', fontWeight: 'bold' }}>
+              <span style={{ color: '#00B894', fontSize: '20px', fontWeight: '900' }}>
                 {makeupCards}
               </span>
             </div>
@@ -313,7 +315,11 @@ export default function CheckInCalendar({
                 <span style={{ color: target.achieved ? '#00B894' : '#888888', flex: 1 }}>
                   连续打卡 {target.days} 天
                 </span>
-                {!target.achieved && (
+                {target.achieved ? (
+                  <Check className="w-4 h-4" style={{ color: '#00B894' }} />
+                ) : activeChallenges.includes(target.days) ? (
+                  <span style={{ color: '#00B894', fontSize: '12px' }}>已设置</span>
+                ) : (
                   <span style={{ color: '#888888', fontSize: '12px' }}>设置目标</span>
                 )}
               </div>
@@ -382,7 +388,7 @@ export default function CheckInCalendar({
             </DialogHeader>
             <div className="py-3">
               <div className="text-center" style={{ color: '#888888', fontSize: '13px' }}>
-                使用后剩余 <span style={{ color: '#00B894', fontWeight: 'bold' }}>{makeupCards - 1}</span> 张补签卡
+                使用后剩余 <span style={{ color: '#00B894', fontWeight: '900' }}>{makeupCards - 1}</span> 张补签卡
               </div>
             </div>
             <DialogFooter className="flex-row gap-3 sm:gap-3">

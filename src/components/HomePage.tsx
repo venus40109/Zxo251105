@@ -68,7 +68,7 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(0, 184, 148, 0.2)', border: '1px solid rgba(0, 184, 148, 0.3)' }}>
                   <Star className="w-3 h-3" style={{ color: '#00B894' }} fill="#00B894" />
-                  <span style={{ color: '#00B894', fontSize: '13px' }}>{userStats.currentRank} {userStats.rankStars}星</span>
+                  <span style={{ color: '#00B894', fontSize: '13px' }}>{userStats.currentRank} <span style={{ fontWeight: 'bold' }}>{userStats.rankStars}</span>星</span>
                 </div>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
             {/* Life extension */}
             <div className="pt-2">
               <div style={{ color: '#EFEFEF', marginBottom: '6px' }}>
-                您已重获新生 <span style={{ color: '#00B894' }}>{userStats.extraLifeDays}</span> 天 <span style={{ color: '#00B894' }}>{userStats.extraLifeHours}</span> 小时
+                您已重获新生 <span style={{ color: '#00B894', fontWeight: 'bold' }}>{userStats.extraLifeDays}</span> 天 <span style={{ color: '#00B894', fontWeight: 'bold' }}>{userStats.extraLifeHours}</span> 小时
               </div>
               <div style={{ color: '#888888', fontSize: '12px', lineHeight: '1.6' }}>
                 数据基于科学统计，每少抽一根烟，约可延长11分钟寿命
@@ -153,23 +153,28 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
           <Button
             onClick={handleCheckIn}
             disabled={hasCheckedInToday}
-            className="w-full h-16 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full h-14 rounded-xl"
             style={{
-              backgroundColor: hasCheckedInToday ? '#E6E7E8' : '#00B894',
+              backgroundColor: hasCheckedInToday ? 'rgba(189, 189, 189, 0.2)' : '#00B894',
               color: hasCheckedInToday ? '#888888' : '#1a1a1a',
-              boxShadow: hasCheckedInToday ? 'none' : '0 4px 24px rgba(0, 184, 148, 0.35)',
-              border: hasCheckedInToday ? 'none' : '1px solid rgba(0, 184, 148, 0.3)',
+              border: 'none',
+              boxShadow: hasCheckedInToday ? 'none' : '0 4px 20px rgba(0, 184, 148, 0.4)',
+              cursor: hasCheckedInToday ? 'not-allowed' : 'pointer',
             }}
           >
-            {hasCheckedInToday ? '今日已打卡' : '立即打卡'}
+            {hasCheckedInToday ? '今日已打卡' : '今日打卡'}
           </Button>
           
           {/* Status Message */}
-          <div className="text-center mt-3" style={{ color: hasError ? '#FF4444' : hasCheckedInToday ? '#00B894' : '#888888', fontSize: '13px' }}>
+          <div className="text-center mt-3" style={{ color: hasError ? '#FF4444' : hasCheckedInToday ? '#888888' : '#888888', fontSize: '13px', lineHeight: '1.6' }}>
             {hasError ? (
               '网络异常，请重试'
             ) : hasCheckedInToday ? (
-              `已打卡！明日可连续 ${userStats.consecutiveDays + 1} 天，距"${userStats.nextRank}"还需 ${userStats.daysToNextRank} 天`
+              <>
+                已打卡，连续打卡{userStats.consecutiveDays}天！
+                <br />
+                明日打卡后，距晋级"{userStats.nextRank}"还需打卡{userStats.daysToNextRank}天
+              </>
             ) : (
               '每一次呼吸，都是自由的选择'
             )}
@@ -193,77 +198,41 @@ function ZXOIcon() {
   const [isPressed, setIsPressed] = useState(false);
 
   const playSound = () => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const now = audioContext.currentTime;
-    
-    // 金属木鱼声 (Metal Wooden Fish Sound)
-    // 温润舒适的金属敲击音，类似木鱼但是金属材质
-    
-    // 主敲击声 - 温润的中频金属音
-    const impact = audioContext.createOscillator();
-    const impactGain = audioContext.createGain();
-    impact.type = 'sine';
-    impact.frequency.value = 800;
-    impact.frequency.exponentialRampToValueAtTime(600, now + 0.05);
-    
-    impact.connect(impactGain);
-    impactGain.connect(audioContext.destination);
-    
-    impactGain.gain.setValueAtTime(0.3, now);
-    impactGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-    
-    impact.start(now);
-    impact.stop(now + 0.08);
-    
-    // 金属共鸣 - 温暖的余韵
-    const resonance = audioContext.createOscillator();
-    const resonanceGain = audioContext.createGain();
-    resonance.type = 'triangle';
-    resonance.frequency.value = 1200;
-    resonance.frequency.exponentialRampToValueAtTime(900, now + 0.15);
-    
-    resonance.connect(resonanceGain);
-    resonanceGain.connect(audioContext.destination);
-    
-    resonanceGain.gain.setValueAtTime(0.08, now + 0.02);
-    resonanceGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-    
-    resonance.start(now + 0.02);
-    resonance.stop(now + 0.15);
-    
-    // 低频余韵 - 增加饱满感
-    const bass = audioContext.createOscillator();
-    const bassGain = audioContext.createGain();
-    bass.type = 'sine';
-    bass.frequency.value = 300;
-    
-    bass.connect(bassGain);
-    bassGain.connect(audioContext.destination);
-    
-    bassGain.gain.setValueAtTime(0.15, now);
-    bassGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-    
-    bass.start(now);
-    bass.stop(now + 0.12);
-    
-    // 轻微白噪声 - 模拟敲击质感
-    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.03, audioContext.sampleRate);
-    const noiseData = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < noiseData.length; i++) {
-      noiseData[i] = (Math.random() * 2 - 1) * (1 - i / noiseData.length) * 0.25;
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const now = audioContext.currentTime;
+      
+      // 咔嗒声 (Click/Clack Sound)
+      const click1 = audioContext.createOscillator();
+      const clickGain1 = audioContext.createGain();
+      click1.type = 'square';
+      click1.frequency.value = 2000;
+      
+      click1.connect(clickGain1);
+      clickGain1.connect(audioContext.destination);
+      
+      clickGain1.gain.setValueAtTime(0.15, now);
+      clickGain1.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+      
+      click1.start(now);
+      click1.stop(now + 0.03);
+      
+      const click2 = audioContext.createOscillator();
+      const clickGain2 = audioContext.createGain();
+      click2.type = 'triangle';
+      click2.frequency.value = 800;
+      
+      click2.connect(clickGain2);
+      clickGain2.connect(audioContext.destination);
+      
+      clickGain2.gain.setValueAtTime(0.12, now + 0.04);
+      clickGain2.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      
+      click2.start(now + 0.04);
+      click2.stop(now + 0.08);
+    } catch (error) {
+      console.log('Audio not supported');
     }
-    const noiseSource = audioContext.createBufferSource();
-    noiseSource.buffer = noiseBuffer;
-    const noiseGain = audioContext.createGain();
-    
-    noiseSource.connect(noiseGain);
-    noiseGain.connect(audioContext.destination);
-    
-    noiseGain.gain.setValueAtTime(0.1, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
-    
-    noiseSource.start(now);
-    noiseSource.stop(now + 0.03);
   };
 
   const handleClick = () => {
@@ -301,22 +270,20 @@ function ZXOIcon() {
   );
 }
 
-interface QuickActionButtonProps {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}
-
-function QuickActionButton({ icon, label, onClick }: QuickActionButtonProps) {
+function QuickActionButton({ label, icon, onClick }: { label: string; icon: React.ReactNode; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all hover:opacity-80"
+      className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
       style={{
-        color: '#EFEFEF',
+        backgroundColor: 'rgba(189, 189, 189, 0.1)',
+        border: 'none',
+        color: '#BDBDBD',
       }}
     >
-      <div style={{ color: '#00B894' }}>{icon}</div>
+      <span style={{ color: '#00B894' }}>
+        {icon}
+      </span>
       <span style={{ fontSize: '13px' }}>{label}</span>
     </button>
   );
