@@ -1,0 +1,464 @@
+import { useState, useEffect } from 'react';
+import SplashScreen from './components/SplashScreen';
+import FirstTimeSetup from './components/FirstTimeSetup';
+import HomePage from './components/HomePage';
+import AchievementsPage from './components/AchievementsPage';
+import CheckInCalendar from './components/CheckInCalendar';
+import SharePoster from './components/SharePoster';
+import { getRankByDays, getNextRank } from './utils/rankSystem';
+import { calculateEquivalentItem } from './utils/equivalentItems';
+import { toast, Toaster } from 'sonner@2.0.3';
+import { CustomToast } from './components/CustomToast';
+
+interface SetupData {
+  smokingYears: string;
+  dailyAmount: number;
+  pricePerPack: number;
+  cigarettesPerPack: number;
+}
+
+interface CheckInRecord {
+  date: string;
+  isMakeup: boolean;
+}
+
+interface UserData {
+  nickname: string;
+  avatar: string;
+  setupData: SetupData | null;
+  checkInRecords: CheckInRecord[];
+  makeupCards: number;
+  totalDays: number;
+  consecutiveDays: number;
+  lastCheckInDate: string | null;
+}
+
+interface UserStats {
+  nickname: string;
+  avatar: string;
+  totalDays: number;
+  consecutiveDays: number;
+  cigarettesAvoided: number;
+  moneySaved: number;
+  equivalentItem: string;
+  equivalentCount: number;
+  equivalentUnit: string;
+  extraLifeDays: number;
+  extraLifeHours: number;
+  currentRank: string;
+  rankStars: number;
+  daysToNextRank: number;
+  nextRank: string;
+  consecutiveTarget: number;
+  makeupCards: number;
+}
+
+type Page = 'splash' | 'home' | 'achievements' | 'calendar' | 'share';
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState<Page>('splash');
+  const [showSetupDialog, setShowSetupDialog] = useState(false);
+  
+  // 用户数据 - 新用户从零开始
+  const [userData, setUserData] = useState<UserData>({
+    nickname: '戒烟勇士',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+    setupData: null, // 首次打卡时才设置
+    checkInRecords: [], // 空数组，首次打卡后才有记录
+    makeupCards: 3, // 初始赠送3张补签卡
+    totalDays: 0, // 从0开始
+    consecutiveDays: 0, // 从0开始
+    lastCheckInDate: null,
+  });
+
+  // 检查今天是否已打卡
+  const checkTodayCheckIn = (): boolean => {
+    const today = new Date().toISOString().split('T')[0];
+    return userData.checkInRecords.some(record => record.date === today && !record.isMakeup);
+  };
+
+  // 计算用户统计数据
+  const calculateUserStats = (): UserStats => {
+    const { totalDays, consecutiveDays, setupData, makeupCards } = userData;
+    
+    // 获取段位信息
+    const rankInfo = getRankByDays(totalDays);
+    const nextRankInfo = getNextRank(totalDays);
+    
+    // 计算少抽根数
+    const dailyAmount = setupData?.dailyAmount || 20;
+    const cigarettesAvoided = totalDays * dailyAmount;
+    
+    // 计算节约金额
+    const pricePerPack = setupData?.pricePerPack || 20;
+    const cigarettesPerPack = setupData?.cigarettesPerPack || 20;
+    const moneySaved = (cigarettesAvoided / cigarettesPerPack) * pricePerPack;
+    
+    // 计算等价物
+    const equivalentItem = calculateEquivalentItem(moneySaved);
+    
+    // 计算多活时间（每根烟约减少11分钟寿命）
+    const totalMinutes = cigarettesAvoided * 11;
+    const extraLifeDays = Math.floor(totalMinutes / (24 * 60));
+    const extraLifeHours = Math.floor((totalMinutes % (24 * 60)) / 60);
+    
+    return {
+      nickname: userData.nickname,
+      avatar: userData.avatar,
+      totalDays,
+      consecutiveDays,
+      cigarettesAvoided,
+      moneySaved: Math.round(moneySaved * 100) / 100,
+      equivalentItem: equivalentItem.name,
+      equivalentCount: equivalentItem.count,
+      equivalentUnit: equivalentItem.unit,
+      extraLifeDays,
+      extraLifeHours,
+      currentRank: rankInfo.rank,
+      rankStars: rankInfo.stars,
+      daysToNextRank: nextRankInfo.daysToNext,
+      nextRank: nextRankInfo.nextRank,
+      consecutiveTarget: consecutiveDays + 1,
+      makeupCards
+    };
+  };
+
+  const userStats = calculateUserStats();
+  const hasCheckedInToday = checkTodayCheckIn();
+
+  // Auto-navigate from splash screen
+  useEffect(() => {
+    if (currentPage === 'splash') {
+      const timer = setTimeout(() => {
+        setCurrentPage('home');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage]);
+
+  // 检查连续打卡奖励（每7天赠送1张补签卡）
+  useEffect(() => {
+    if (userData.consecutiveDays > 0 && userData.consecutiveDays % 7 === 0) {
+      const lastRewardDay = Math.floor((userData.consecutiveDays - 1) / 7) * 7;
+      if (userData.consecutiveDays !== lastRewardDay) {
+        // 检查是否已经奖励过
+        const today = new Date().toISOString().split('T')[0];
+        const hasRewardedToday = localStorage.getItem(`reward_${today}`);
+        
+        if (!hasRewardedToday) {
+          setUserData(prev => ({
+            ...prev,
+            makeupCards: prev.makeupCards + 1
+          }));
+          localStorage.setItem(`reward_${today}`, 'true');
+          
+          // 显示奖励提示
+          setTimeout(() => {
+            toast.custom((t) => (
+              <CustomToast message={`目标达成成功：连续${userData.consecutiveDays}天\n获得1张补签卡！`} />
+            ), {
+              duration: 3000,
+            });
+          }, 1000);
+        }
+      }
+    }
+  }, [userData.consecutiveDays]);
+
+  // 播放咔嗒音效
+  const playClickSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const now = audioContext.currentTime;
+      
+      // 咔嗒声 (Click/Clack Sound)
+      const click1 = audioContext.createOscillator();
+      const clickGain1 = audioContext.createGain();
+      click1.type = 'square';
+      click1.frequency.value = 2000;
+      
+      click1.connect(clickGain1);
+      clickGain1.connect(audioContext.destination);
+      
+      clickGain1.gain.setValueAtTime(0.15, now);
+      clickGain1.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+      
+      click1.start(now);
+      click1.stop(now + 0.03);
+      
+      const click2 = audioContext.createOscillator();
+      const clickGain2 = audioContext.createGain();
+      click2.type = 'triangle';
+      click2.frequency.value = 800;
+      
+      click2.connect(clickGain2);
+      clickGain2.connect(audioContext.destination);
+      
+      clickGain2.gain.setValueAtTime(0.12, now + 0.04);
+      clickGain2.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      
+      click2.start(now + 0.04);
+      click2.stop(now + 0.08);
+    } catch (error) {
+      console.log('Audio not supported');
+    }
+  };
+
+  const handleSetupComplete = (data: SetupData) => {
+    console.log('Setup data:', data);
+    setUserData(prev => ({
+      ...prev,
+      setupData: data
+    }));
+    setShowSetupDialog(false);
+    
+    // 首次设置后自动完成首次打卡
+    setTimeout(() => {
+      handleCheckIn(true);
+    }, 100);
+  };
+
+  const handleCheckIn = (isFirstTime: boolean = false) => {
+    // 如果没有设置数据，弹出设置弹窗
+    if (!userData.setupData && !isFirstTime) {
+      setShowSetupDialog(true);
+      return;
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    
+    // 检查今天是否已打卡
+    if (userData.checkInRecords.some(record => record.date === today)) {
+      if (!isFirstTime) {
+        toast.error('今天已经打卡过了');
+      }
+      return;
+    }
+    
+    // 添加打卡记录
+    const newRecord: CheckInRecord = {
+      date: today,
+      isMakeup: false
+    };
+    
+    // 检查是否连续
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    const hasYesterdayRecord = userData.checkInRecords.some(
+      record => record.date === yesterdayStr
+    );
+    
+    const newConsecutiveDays = hasYesterdayRecord || userData.consecutiveDays === 0
+      ? userData.consecutiveDays + 1
+      : 1;
+    
+    setUserData(prev => ({
+      ...prev,
+      checkInRecords: [...prev.checkInRecords, newRecord],
+      totalDays: prev.totalDays + 1,
+      consecutiveDays: newConsecutiveDays,
+      lastCheckInDate: today,
+      hasCheckedInToday: true
+    }));
+    
+    // 获取新的段位信息
+    const newTotalDays = userData.totalDays + 1;
+    const newRankInfo = getRankByDays(newTotalDays);
+    const oldRankInfo = getRankByDays(userData.totalDays);
+    
+    // 播放音效
+    playClickSound();
+    
+    // 检查是否晋升
+    if (newRankInfo.rank !== oldRankInfo.rank) {
+      setTimeout(() => {
+        toast.custom((t) => (
+          <CustomToast message={`恭喜晋升至${newRankInfo.rank}！\n${newRankInfo.promotionMessage}`} />
+        ), {
+          duration: 3000,
+        });
+      }, 500);
+    } else {
+      toast.custom((t) => (
+        <CustomToast message="打卡成功！" />
+      ), {
+        duration: 2000,
+      });
+    }
+  };
+
+  const handleMakeup = (date: string) => {
+    // 检查补签卡数量
+    if (userData.makeupCards <= 0) {
+      toast.error('补签卡不足');
+      return false;
+    }
+    
+    // 检查今天是否已经补签过2次
+    const today = new Date().toISOString().split('T')[0];
+    const todayMakeups = userData.checkInRecords.filter(
+      record => record.isMakeup && record.date === today
+    ).length;
+    
+    if (todayMakeups >= 2) {
+      toast.error('每日最多补签2天');
+      return false;
+    }
+    
+    // 检查该日期是否已经打卡
+    if (userData.checkInRecords.some(record => record.date === date)) {
+      toast.error('该日期已经打卡');
+      return false;
+    }
+    
+    // 添加补签记录
+    const newRecord: CheckInRecord = {
+      date,
+      isMakeup: true
+    };
+    
+    // 重新计算连续天数
+    const newRecords = [...userData.checkInRecords, newRecord].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    let newConsecutiveDays = 0;
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < newRecords.length; i++) {
+      const recordDate = new Date(newRecords[i].date);
+      recordDate.setHours(0, 0, 0, 0);
+      
+      const expectedDate = new Date(todayDate);
+      expectedDate.setDate(expectedDate.getDate() - i);
+      
+      if (recordDate.getTime() === expectedDate.getTime()) {
+        newConsecutiveDays++;
+      } else {
+        break;
+      }
+    }
+    
+    setUserData(prev => ({
+      ...prev,
+      checkInRecords: newRecords,
+      totalDays: prev.totalDays + 1,
+      consecutiveDays: newConsecutiveDays,
+      makeupCards: prev.makeupCards - 1
+    }));
+    
+    // 获取新的段位信息
+    const newTotalDays = userData.totalDays + 1;
+    const newRankInfo = getRankByDays(newTotalDays);
+    const oldRankInfo = getRankByDays(userData.totalDays);
+    
+    // 播放音效
+    playClickSound();
+    
+    // 检查是否晋升
+    if (newRankInfo.rank !== oldRankInfo.rank) {
+      setTimeout(() => {
+        toast.custom((t) => (
+          <CustomToast message={`恭喜晋升至${newRankInfo.rank}！\n${newRankInfo.promotionMessage}`} />
+        ), {
+          duration: 3000,
+        });
+      }, 500);
+    } else {
+      toast.custom((t) => (
+        <CustomToast message="补签成功！" />
+      ), {
+        duration: 2000,
+      });
+    }
+    
+    return true;
+  };
+
+  const handleNavigate = (page: 'achievements' | 'calendar' | 'share') => {
+    setCurrentPage(page);
+  };
+
+  const handleBack = () => {
+    setCurrentPage('home');
+  };
+
+  // Render current page
+  return (
+    <>
+      <Toaster 
+        position="top-center"
+        offset="50%"
+        toastOptions={{
+          unstyled: true,
+          classNames: {
+            toast: 'flex items-center justify-center',
+          },
+        }}
+      />
+      {(() => {
+        switch (currentPage) {
+          case 'splash':
+            return <SplashScreen />;
+    
+    case 'home':
+      return (
+        <>
+          <HomePage 
+            userStats={userStats} 
+            onNavigate={handleNavigate}
+            onCheckIn={() => handleCheckIn(false)}
+            hasCheckedInToday={hasCheckedInToday}
+          />
+          {showSetupDialog && (
+            <FirstTimeSetup 
+              onComplete={handleSetupComplete}
+              onClose={() => setShowSetupDialog(false)}
+            />
+          )}
+        </>
+      );
+    
+    case 'achievements':
+      return (
+        <AchievementsPage
+          onBack={handleBack}
+          currentRank={userStats.currentRank}
+          rankStars={userStats.rankStars}
+          totalDays={userStats.totalDays}
+          consecutiveDays={userStats.consecutiveDays}
+        />
+      );
+    
+    case 'calendar':
+      return (
+        <CheckInCalendar
+          onBack={handleBack}
+          consecutiveDays={userStats.consecutiveDays}
+          makeupCards={userStats.makeupCards}
+          checkInRecords={userData.checkInRecords}
+          onMakeup={handleMakeup}
+          currentRank={userStats.currentRank}
+        />
+      );
+    
+    case 'share':
+      return <SharePoster onBack={handleBack} userStats={userStats} />;
+    
+    default:
+      return (
+        <HomePage 
+          userStats={userStats} 
+          onNavigate={handleNavigate}
+          onCheckIn={() => handleCheckIn(false)}
+          hasCheckedInToday={hasCheckedInToday}
+        />
+      );
+        }
+      })()}
+    </>
+  );
+}
