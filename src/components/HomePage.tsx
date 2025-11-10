@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
-import { Trophy, Flame, Share2, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 import EquivalentItemIcon from './EquivalentItemIcon';
+import { toast } from 'sonner@2.0.3';
 
 interface UserStats {
   nickname: string;
@@ -28,12 +29,90 @@ interface UserStats {
 
 interface HomePageProps {
   userStats: UserStats;
-  onNavigate: (page: 'achievements' | 'calendar' | 'share') => void;
+  onNavigate: (page: 'achievements' | 'calendar' | 'share' | 'report' | 'settings') => void;
   onCheckIn: () => void;
   hasCheckedInToday: boolean;
+  onCravingRecord: () => void;
 }
 
-export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedInToday }: HomePageProps) {
+function ZXOIcon({ onCravingRecord, hasCheckedInToday }: { onCravingRecord: () => void; hasCheckedInToday: boolean }) {
+  const [isPressed, setIsPressed] = useState(false);
+
+  const playSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const now = audioContext.currentTime;
+      
+      // 咔嗒声 (Click/Clack Sound)
+      const click1 = audioContext.createOscillator();
+      const clickGain1 = audioContext.createGain();
+      click1.type = 'square';
+      click1.frequency.value = 2000;
+      
+      click1.connect(clickGain1);
+      clickGain1.connect(audioContext.destination);
+      
+      clickGain1.gain.setValueAtTime(0.15, now);
+      clickGain1.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+      
+      click1.start(now);
+      click1.stop(now + 0.03);
+      
+      const click2 = audioContext.createOscillator();
+      const clickGain2 = audioContext.createGain();
+      click2.type = 'triangle';
+      click2.frequency.value = 800;
+      
+      click2.connect(clickGain2);
+      clickGain2.connect(audioContext.destination);
+      
+      clickGain2.gain.setValueAtTime(0.12, now + 0.04);
+      clickGain2.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+      
+      click2.start(now + 0.04);
+      click2.stop(now + 0.08);
+    } catch (error) {
+      console.log('Audio not supported');
+    }
+  };
+
+  const handleClick = () => {
+    if (!hasCheckedInToday) {
+      toast.error('请先打卡，再记录烟瘾');
+      return;
+    }
+    setIsPressed(true);
+    playSound();
+    onCravingRecord(); // 记录烟瘾
+    setTimeout(() => setIsPressed(false), 300);
+  };
+
+  return (
+    <motion.button
+      onClick={handleClick}
+      className="relative flex items-center justify-center rounded-lg"
+      style={{
+        width: '48px',
+        height: '48px',
+        background: 'linear-gradient(145deg, rgba(189, 189, 189, 0.15) 0%, rgba(189, 189, 189, 0.05) 100%)',
+        border: '2px solid rgba(189, 189, 189, 0.3)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+      }}
+      whileTap={{ scale: 0.85, rotate: 15 }}
+      animate={isPressed ? {
+        boxShadow: '0 0 20px rgba(189, 189, 189, 0.6), inset 0 0 15px rgba(0, 184, 148, 0.3)',
+        borderColor: 'rgba(0, 184, 148, 0.8)',
+      } : {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+        borderColor: 'rgba(189, 189, 189, 0.3)',
+      }}
+    >
+      <BrandLogo size={28} color={isPressed ? '#00B894' : '#BDBDBD'} />
+    </motion.button>
+  );
+}
+
+export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedInToday, onCravingRecord }: HomePageProps) {
   const [hasError, setHasError] = useState(false);
 
   const handleCheckIn = () => {
@@ -43,6 +122,14 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
       setTimeout(() => setHasError(false), 3000);
     } else {
       onCheckIn();
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (hasCheckedInToday) {
+      onNavigate('report');
+    } else {
+      handleCheckIn();
     }
   };
 
@@ -57,23 +144,29 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
         {/* Header: Avatar + Nickname + Rank + Brand Icon */}
         <div className="flex items-start justify-between mb-8">
           <div className="flex items-start gap-3">
-            <Avatar className="w-12 h-12 ring-2 ring-offset-2 ring-offset-transparent" style={{ ringColor: '#00B894' }}>
-              <AvatarImage src={userStats.avatar} />
-              <AvatarFallback style={{ backgroundColor: '#00B894', color: '#1a1a1a' }}>
-                {userStats.nickname[0]}
-              </AvatarFallback>
-            </Avatar>
+            <button onClick={() => onNavigate('settings')} style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+              <Avatar className="w-12 h-12 ring-2 ring-offset-2 ring-offset-transparent" style={{ ringColor: '#00B894' }}>
+                <AvatarImage src={userStats.avatar} />
+                <AvatarFallback style={{ backgroundColor: '#00B894', color: '#1a1a1a' }}>
+                  {userStats.nickname[0]}
+                </AvatarFallback>
+              </Avatar>
+            </button>
             <div className="flex-1">
               <div style={{ color: '#EFEFEF' }} className="mb-1 truncate">{userStats.nickname}</div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(0, 184, 148, 0.2)', border: '1px solid rgba(0, 184, 148, 0.3)' }}>
+                <button 
+                  onClick={() => onNavigate('achievements')}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded transition-all hover:opacity-80" 
+                  style={{ backgroundColor: 'rgba(0, 184, 148, 0.2)', border: '1px solid rgba(0, 184, 148, 0.3)', cursor: 'pointer' }}
+                >
                   <Star className="w-3 h-3" style={{ color: '#00B894' }} fill="#00B894" />
                   <span style={{ color: '#00B894', fontSize: '13px' }}>{userStats.currentRank} <span style={{ fontWeight: 'bold' }}>{userStats.rankStars}</span>星</span>
-                </div>
+                </button>
               </div>
             </div>
           </div>
-          <ZXOIcon />
+          <ZXOIcon onCravingRecord={onCravingRecord} hasCheckedInToday={hasCheckedInToday} />
         </div>
 
         {/* Stats Info Card */}
@@ -92,10 +185,14 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
                 <div style={{ color: '#888888', fontSize: '12px', marginBottom: '4px' }}>已坚持</div>
                 <div style={{ color: '#00B894', fontSize: '24px', fontWeight: 'bold' }}>{userStats.totalDays} <span style={{ fontSize: '14px', color: '#EFEFEF' }}>天</span></div>
               </div>
-              <div className="text-right">
+              <button 
+                onClick={() => onNavigate('calendar')}
+                className="text-right transition-all hover:opacity-80"
+                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+              >
                 <div style={{ color: '#888888', fontSize: '12px', marginBottom: '4px' }}>连续打卡</div>
                 <div style={{ color: '#00B894', fontSize: '24px', fontWeight: 'bold' }}>{userStats.consecutiveDays} <span style={{ fontSize: '14px', color: '#EFEFEF' }}>天</span></div>
-              </div>
+              </button>
             </div>
             
             {/* Cigarettes and Money */}
@@ -148,21 +245,20 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
           </div>
         </div>
 
-        {/* Check-in Button */}
+        {/* Check-in / Share Button */}
         <div className="mb-6">
           <Button
-            onClick={handleCheckIn}
-            disabled={hasCheckedInToday}
+            onClick={handleButtonClick}
             className="w-full h-14 rounded-xl"
             style={{
-              backgroundColor: hasCheckedInToday ? 'rgba(189, 189, 189, 0.2)' : '#00B894',
-              color: hasCheckedInToday ? '#888888' : '#1a1a1a',
+              backgroundColor: hasCheckedInToday ? '#00B894' : '#00B894',
+              color: '#1a1a1a',
               border: 'none',
-              boxShadow: hasCheckedInToday ? 'none' : '0 4px 20px rgba(0, 184, 148, 0.4)',
-              cursor: hasCheckedInToday ? 'not-allowed' : 'pointer',
+              boxShadow: '0 4px 20px rgba(0, 184, 148, 0.4)',
+              cursor: 'pointer',
             }}
           >
-            {hasCheckedInToday ? '今日已打卡' : '今日打卡'}
+            {hasCheckedInToday ? '数据报告' : '今日打卡'}
           </Button>
           
           {/* Status Message */}
@@ -180,111 +276,9 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
             )}
           </div>
         </div>
-
-        {/* Quick Actions */}
-        <div className="flex items-center justify-center gap-2">
-          <QuickActionButton label="成就等级" icon={<Trophy className="w-4 h-4" />} onClick={() => onNavigate('achievements')} />
-          <div className="h-4 w-px" style={{ backgroundColor: 'rgba(189, 189, 189, 0.3)' }} />
-          <QuickActionButton label="连续打卡" icon={<Flame className="w-4 h-4" />} onClick={() => onNavigate('calendar')} />
-          <div className="h-4 w-px" style={{ backgroundColor: 'rgba(189, 189, 189, 0.3)' }} />
-          <QuickActionButton label="分享海报" icon={<Share2 className="w-4 h-4" />} onClick={() => onNavigate('share')} />
-        </div>
       </div>
     </div>
   );
 }
 
-function ZXOIcon() {
-  const [isPressed, setIsPressed] = useState(false);
 
-  const playSound = () => {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const now = audioContext.currentTime;
-      
-      // 咔嗒声 (Click/Clack Sound)
-      const click1 = audioContext.createOscillator();
-      const clickGain1 = audioContext.createGain();
-      click1.type = 'square';
-      click1.frequency.value = 2000;
-      
-      click1.connect(clickGain1);
-      clickGain1.connect(audioContext.destination);
-      
-      clickGain1.gain.setValueAtTime(0.15, now);
-      clickGain1.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
-      
-      click1.start(now);
-      click1.stop(now + 0.03);
-      
-      const click2 = audioContext.createOscillator();
-      const clickGain2 = audioContext.createGain();
-      click2.type = 'triangle';
-      click2.frequency.value = 800;
-      
-      click2.connect(clickGain2);
-      clickGain2.connect(audioContext.destination);
-      
-      clickGain2.gain.setValueAtTime(0.12, now + 0.04);
-      clickGain2.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-      
-      click2.start(now + 0.04);
-      click2.stop(now + 0.08);
-    } catch (error) {
-      console.log('Audio not supported');
-    }
-  };
-
-  const handleClick = () => {
-    setIsPressed(true);
-    playSound();
-    setTimeout(() => setIsPressed(false), 300);
-  };
-
-  return (
-    <motion.button
-      onClick={handleClick}
-      className="relative flex items-center justify-center rounded-lg"
-      style={{
-        width: '48px',
-        height: '48px',
-        background: 'linear-gradient(145deg, rgba(189, 189, 189, 0.15) 0%, rgba(189, 189, 189, 0.05) 100%)',
-        border: '2px solid rgba(189, 189, 189, 0.3)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-      }}
-      whileTap={{ scale: 0.85, rotate: 15 }}
-      animate={isPressed ? {
-        boxShadow: '0 0 20px rgba(189, 189, 189, 0.6), inset 0 0 15px rgba(0, 184, 148, 0.3)',
-        borderColor: 'rgba(0, 184, 148, 0.8)',
-      } : {
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-        borderColor: 'rgba(189, 189, 189, 0.3)',
-      }}
-      transition={{ duration: 0.2 }}
-    >
-      <BrandLogo 
-        size={28} 
-        color={isPressed ? '#00B894' : '#BDBDBD'} 
-      />
-    </motion.button>
-  );
-}
-
-function QuickActionButton({ label, icon, onClick }: { label: string; icon: React.ReactNode; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all"
-      style={{
-        backgroundColor: 'rgba(189, 189, 189, 0.1)',
-        border: 'none',
-        color: '#BDBDBD',
-      }}
-    >
-      <span style={{ color: '#00B894' }}>
-        {icon}
-      </span>
-      <span style={{ fontSize: '13px' }}>{label}</span>
-    </button>
-  );
-}

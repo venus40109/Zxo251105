@@ -5,6 +5,8 @@ import HomePage from './components/HomePage';
 import AchievementsPage from './components/AchievementsPage';
 import CheckInCalendar from './components/CheckInCalendar';
 import SharePoster from './components/SharePoster';
+import DataReportPage from './components/DataReportPage';
+import SettingsPage from './components/SettingsPage';
 import { getRankByDays, getNextRank } from './utils/rankSystem';
 import { calculateEquivalentItem } from './utils/equivalentItems';
 import { toast, Toaster } from 'sonner@2.0.3';
@@ -22,15 +24,24 @@ interface CheckInRecord {
   isMakeup: boolean;
 }
 
+interface CravingRecord {
+  timestamp: number;
+  date: string;
+  hour: number;
+}
+
 interface UserData {
   nickname: string;
   avatar: string;
   setupData: SetupData | null;
   checkInRecords: CheckInRecord[];
+  cravingRecords: CravingRecord[];
   makeupCards: number;
   totalDays: number;
   consecutiveDays: number;
   lastCheckInDate: string | null;
+  lastCravingTime: number | null;
+  hasAgreedToTerms: boolean;
 }
 
 interface UserStats {
@@ -53,11 +64,10 @@ interface UserStats {
   makeupCards: number;
 }
 
-type Page = 'splash' | 'home' | 'achievements' | 'calendar' | 'share';
+type Page = 'splash' | 'home' | 'achievements' | 'calendar' | 'share' | 'report' | 'settings' | 'setup';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
-  const [showSetupDialog, setShowSetupDialog] = useState(false);
   
   // 用户数据 - 新用户从零开始
   const [userData, setUserData] = useState<UserData>({
@@ -65,10 +75,13 @@ export default function App() {
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
     setupData: null, // 首次打卡时才设置
     checkInRecords: [], // 空数组，首次打卡后才有记录
+    cravingRecords: [], // 烟瘾记录
     makeupCards: 3, // 初始赠送3张补签卡
     totalDays: 0, // 从0开始
     consecutiveDays: 0, // 从0开始
     lastCheckInDate: null,
+    lastCravingTime: null, // 上次记录烟瘾的时间
+    hasAgreedToTerms: false, // 是否同意协议
   });
 
   // 检查今天是否已打卡
@@ -208,9 +221,10 @@ export default function App() {
     console.log('Setup data:', data);
     setUserData(prev => ({
       ...prev,
-      setupData: data
+      setupData: data,
+      hasAgreedToTerms: true, // 完成设置即表示已同意协议
     }));
-    setShowSetupDialog(false);
+    setCurrentPage('home');
     
     // 首次设置后自动完成首次打卡
     setTimeout(() => {
@@ -219,9 +233,9 @@ export default function App() {
   };
 
   const handleCheckIn = (isFirstTime: boolean = false) => {
-    // 如果没有设置数据，弹出设置弹窗
+    // 如果没有设置数据，跳转到设置页面（协议在设置页面中一起同意）
     if (!userData.setupData && !isFirstTime) {
-      setShowSetupDialog(true);
+      setCurrentPage('setup');
       return;
     }
     
@@ -378,8 +392,49 @@ export default function App() {
     return true;
   };
 
-  const handleNavigate = (page: 'achievements' | 'calendar' | 'share') => {
+  const handleNavigate = (page: 'achievements' | 'calendar' | 'share' | 'report' | 'settings') => {
     setCurrentPage(page);
+  };
+
+  // 更新吸烟信息
+  const handleUpdateSetupData = (data: SetupData) => {
+    setUserData(prev => ({
+      ...prev,
+      setupData: data,
+    }));
+  };
+
+  // 记录烟瘾
+  const handleCravingRecord = () => {
+    const now = Date.now();
+    const tenMinutes = 10 * 60 * 1000; // 10分钟
+
+    // 检查距离上次记录是否超过10分钟
+    if (userData.lastCravingTime && now - userData.lastCravingTime < tenMinutes) {
+      // 10分钟内重复点击，不记录，只播放音效
+      return;
+    }
+
+    // 记录烟瘾
+    const date = new Date();
+    const newRecord: CravingRecord = {
+      timestamp: now,
+      date: date.toISOString().split('T')[0],
+      hour: date.getHours(),
+    };
+
+    setUserData(prev => ({
+      ...prev,
+      cravingRecords: [...prev.cravingRecords, newRecord],
+      lastCravingTime: now,
+    }));
+
+    // 显示提示
+    toast.custom((t) => (
+      <CustomToast message="烟瘾记录已保存" />
+    ), {
+      duration: 1500,
+    });
   };
 
   const handleBack = () => {
@@ -406,20 +461,21 @@ export default function App() {
     
     case 'home':
       return (
-        <>
-          <HomePage 
-            userStats={userStats} 
-            onNavigate={handleNavigate}
-            onCheckIn={() => handleCheckIn(false)}
-            hasCheckedInToday={hasCheckedInToday}
-          />
-          {showSetupDialog && (
-            <FirstTimeSetup 
-              onComplete={handleSetupComplete}
-              onClose={() => setShowSetupDialog(false)}
-            />
-          )}
-        </>
+        <HomePage 
+          userStats={userStats} 
+          onNavigate={handleNavigate}
+          onCheckIn={() => handleCheckIn(false)}
+          hasCheckedInToday={hasCheckedInToday}
+          onCravingRecord={handleCravingRecord}
+        />
+      );
+    
+    case 'setup':
+      return (
+        <FirstTimeSetup 
+          onComplete={handleSetupComplete}
+          onBack={() => setCurrentPage('home')}
+        />
       );
     
     case 'achievements':
@@ -448,6 +504,33 @@ export default function App() {
     case 'share':
       return <SharePoster onBack={handleBack} userStats={userStats} />;
     
+    case 'report':
+      return (
+        <DataReportPage
+          onBack={handleBack}
+          onShare={() => setCurrentPage('share')}
+          cravingRecords={userData.cravingRecords}
+          totalDays={userStats.totalDays}
+          cigarettesAvoided={userStats.cigarettesAvoided}
+          moneySaved={userStats.moneySaved}
+          equivalentItem={userStats.equivalentItem}
+          equivalentCount={userStats.equivalentCount}
+        />
+      );
+    
+    case 'settings':
+      return (
+        <SettingsPage
+          onBack={handleBack}
+          nickname={userData.nickname}
+          avatar={userData.avatar}
+          setupData={userData.setupData}
+          onUpdateSetupData={handleUpdateSetupData}
+          currentRank={userStats.currentRank}
+          rankStars={userStats.rankStars}
+        />
+      );
+    
     default:
       return (
         <HomePage 
@@ -455,6 +538,7 @@ export default function App() {
           onNavigate={handleNavigate}
           onCheckIn={() => handleCheckIn(false)}
           hasCheckedInToday={hasCheckedInToday}
+          onCravingRecord={handleCravingRecord}
         />
       );
         }

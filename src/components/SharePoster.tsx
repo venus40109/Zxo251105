@@ -125,14 +125,14 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
                   border: '2px solid #00B894',
                 }}
               >
-                <div className="text-center mb-4">
-                  <div style={{ color: '#888888', fontSize: '13px', marginBottom: '6px' }}>
+                <div className="text-center mb-3">
+                  <div style={{ color: '#888888', fontSize: '12px', marginBottom: '4px' }}>
                     已坚持戒烟
                   </div>
-                  <div style={{ color: '#00B894', fontSize: '48px', fontWeight: '900', lineHeight: '1' }}>
+                  <div style={{ color: '#00B894', fontSize: '36px', fontWeight: '900', lineHeight: '1' }}>
                     {userStats.totalDays}
                   </div>
-                  <div style={{ color: '#141414', fontSize: '16px', marginTop: '4px' }}>
+                  <div style={{ color: '#141414', fontSize: '14px', marginTop: '2px' }}>
                     天
                   </div>
                 </div>
