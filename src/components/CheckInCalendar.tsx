@@ -118,22 +118,21 @@ export default function CheckInCalendar({
     <div 
       className="min-h-screen flex items-center justify-center p-6"
       style={{
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
+        background: '#EFEFEF',
       }}
     >
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button
+          <button
             onClick={onBack}
-            variant="ghost"
-            className="p-0 h-auto hover:bg-transparent"
-            style={{ color: '#EFEFEF' }}
+            className="p-2 rounded-lg transition-all hover:bg-black/5"
+            style={{ color: '#2A2A2A', backgroundColor: 'rgba(42, 42, 42, 0.08)' }}
           >
             <ChevronLeft className="w-6 h-6" />
-          </Button>
+          </button>
           <div className="text-center flex-1">
-            <div style={{ color: '#EFEFEF', fontSize: '18px', marginBottom: '4px' }}>连续打卡</div>
+            <div style={{ color: '#2A2A2A', fontSize: '18px', marginBottom: '4px' }}>连续打卡</div>
             <div style={{ color: '#888888', fontSize: '13px' }}>{checkInMessage}</div>
           </div>
           <div className="w-6" />
@@ -155,16 +154,16 @@ export default function CheckInCalendar({
           <div style={{ color: '#00B894', fontSize: '48px', fontWeight: '900', lineHeight: 1 }}>
             {consecutiveDays}
           </div>
-          <div style={{ color: '#EFEFEF', marginTop: '8px' }}>连续打卡天数</div>
+          <div style={{ color: '#2A2A2A', marginTop: '8px' }}>连续打卡天数</div>
           
           {/* Makeup Cards */}
           <div 
             className="mt-4 pt-4"
-            style={{ borderTop: '1px solid rgba(189, 189, 189, 0.2)' }}
+            style={{ borderTop: '1px solid rgba(0, 184, 148, 0.2)' }}
           >
             <div className="flex items-center justify-center gap-2">
               <Ticket className="w-5 h-5" style={{ color: '#00B894' }} />
-              <span style={{ color: '#EFEFEF' }}>补签卡</span>
+              <span style={{ color: '#2A2A2A' }}>补签卡</span>
               <span style={{ color: '#00B894', fontSize: '20px', fontWeight: '900' }}>
                 {makeupCards}
               </span>
@@ -179,9 +178,9 @@ export default function CheckInCalendar({
         <div 
           className="rounded-2xl p-4 mb-6"
           style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-            border: '1px solid rgba(189, 189, 189, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(42, 42, 42, 0.1)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           }}
         >
           {/* Month Navigation */}
@@ -194,11 +193,11 @@ export default function CheckInCalendar({
               }}
               variant="ghost"
               className="p-2 h-auto"
-              style={{ color: '#EFEFEF' }}
+              style={{ color: '#2A2A2A' }}
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            <div style={{ color: '#EFEFEF' }}>
+            <div style={{ color: '#2A2A2A' }}>
               {currentMonth.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}
             </div>
             <Button
@@ -209,7 +208,7 @@ export default function CheckInCalendar({
               }}
               variant="ghost"
               className="p-2 h-auto"
-              style={{ color: '#EFEFEF' }}
+              style={{ color: '#2A2A2A' }}
             >
               <ChevronRight className="w-5 h-5" />
             </Button>
@@ -254,7 +253,7 @@ export default function CheckInCalendar({
                     border: checkedIn 
                       ? '1px solid rgba(0, 184, 148, 0.4)' 
                       : '1px solid rgba(189, 189, 189, 0.1)',
-                    color: isFuture ? '#444444' : checkedIn ? '#00B894' : '#EFEFEF',
+                    color: isFuture ? '#CCCCCC' : checkedIn ? '#00B894' : '#2A2A2A',
                     cursor: canMakeup ? 'pointer' : 'default',
                   }}
                   whileHover={canMakeup ? { scale: 1.1 } : {}}
@@ -284,12 +283,12 @@ export default function CheckInCalendar({
         <div 
           className="rounded-2xl p-4"
           style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-            border: '1px solid rgba(189, 189, 189, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(42, 42, 42, 0.1)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           }}
         >
-          <div style={{ color: '#EFEFEF', marginBottom: '12px' }}>挑战目标</div>
+          <div style={{ color: '#2A2A2A', marginBottom: '12px' }}>挑战目标</div>
           <div className="space-y-2">
             {challengeTargets.map((target) => (
               <div
@@ -332,14 +331,14 @@ export default function CheckInCalendar({
           <DialogContent 
             className="max-w-sm mx-4"
             style={{ 
-              backgroundColor: '#2d2d2d', 
-              border: '1px solid rgba(189, 189, 189, 0.4)',
+              backgroundColor: '#FFFFFF', 
+              border: '1px solid rgba(42, 42, 42, 0.1)',
               width: 'calc(100% - 48px)',
               maxWidth: '360px'
             }}
           >
             <DialogHeader>
-              <DialogTitle style={{ color: '#EFEFEF', textAlign: 'center' }}>设置目标</DialogTitle>
+              <DialogTitle style={{ color: '#2A2A2A', textAlign: 'center' }}>设置目标</DialogTitle>
               <DialogDescription style={{ color: '#888888', textAlign: 'center', paddingTop: '8px' }}>
                 您确定要挑战连续{selectedChallenge}天打卡？
               </DialogDescription>
@@ -350,10 +349,10 @@ export default function CheckInCalendar({
                 onClick={() => setShowChallengeDialog(false)}
                 className="flex-1"
                 style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  borderColor: 'rgba(189, 189, 189, 0.4)', 
-                  color: '#EFEFEF',
-                  border: '1px solid rgba(189, 189, 189, 0.4)'
+                  backgroundColor: 'rgba(42, 42, 42, 0.08)',
+                  borderColor: 'rgba(42, 42, 42, 0.2)', 
+                  color: '#2A2A2A',
+                  border: '1px solid rgba(42, 42, 42, 0.2)'
                 }}
               >
                 取消
@@ -361,7 +360,7 @@ export default function CheckInCalendar({
               <Button
                 onClick={handleConfirmChallenge}
                 className="flex-1"
-                style={{ backgroundColor: '#00B894', color: '#1a1a1a' }}
+                style={{ backgroundColor: '#00B894', color: '#FFFFFF' }}
               >
                 确定
               </Button>
@@ -374,14 +373,14 @@ export default function CheckInCalendar({
           <DialogContent 
             className="max-w-sm mx-4"
             style={{ 
-              backgroundColor: '#2d2d2d', 
-              border: '1px solid rgba(189, 189, 189, 0.4)',
+              backgroundColor: '#FFFFFF', 
+              border: '1px solid rgba(42, 42, 42, 0.1)',
               width: 'calc(100% - 48px)',
               maxWidth: '360px'
             }}
           >
             <DialogHeader>
-              <DialogTitle style={{ color: '#EFEFEF', textAlign: 'center' }}>补签确认</DialogTitle>
+              <DialogTitle style={{ color: '#2A2A2A', textAlign: 'center' }}>补签确认</DialogTitle>
               <DialogDescription style={{ color: '#888888', textAlign: 'center', paddingTop: '8px' }}>
                 确定要为 {selectedDate?.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-')} 使用补签卡吗？
               </DialogDescription>
@@ -397,10 +396,10 @@ export default function CheckInCalendar({
                 onClick={() => setShowMakeupDialog(false)}
                 className="flex-1"
                 style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  borderColor: 'rgba(189, 189, 189, 0.4)', 
-                  color: '#EFEFEF',
-                  border: '1px solid rgba(189, 189, 189, 0.4)'
+                  backgroundColor: 'rgba(42, 42, 42, 0.08)',
+                  borderColor: 'rgba(42, 42, 42, 0.2)', 
+                  color: '#2A2A2A',
+                  border: '1px solid rgba(42, 42, 42, 0.2)'
                 }}
               >
                 取消
@@ -408,7 +407,7 @@ export default function CheckInCalendar({
               <Button
                 onClick={handleMakeup}
                 className="flex-1"
-                style={{ backgroundColor: '#00B894', color: '#1a1a1a' }}
+                style={{ backgroundColor: '#00B894', color: '#FFFFFF' }}
                 disabled={makeupCards <= 0}
               >
                 确定

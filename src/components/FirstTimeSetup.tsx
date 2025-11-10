@@ -16,7 +16,7 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
   const [dailyAmount, setDailyAmount] = useState('');
   const [pricePerPack, setPricePerPack] = useState('');
   const [cigarettesPerPack, setCigarettesPerPack] = useState('');
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
   const [showAgreement, setShowAgreement] = useState<'privacy' | 'terms' | null>(null);
 
   const isFormValid = () => {
@@ -50,7 +50,7 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
     <div
       className="min-h-screen p-6"
       style={{
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
+        background: '#EFEFEF',
       }}
     >
       <div className="w-full max-w-md mx-auto">
@@ -58,19 +58,19 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={onBack}
-            className="flex items-center gap-2"
-            style={{ color: '#EFEFEF', background: 'none', border: 'none', cursor: 'pointer' }}
+            className="flex items-center gap-2 p-2 rounded-lg transition-all hover:bg-black/5"
+            style={{ color: '#2A2A2A', background: 'rgba(42, 42, 42, 0.08)', border: 'none', cursor: 'pointer' }}
           >
             <ChevronLeft className="w-5 h-5" />
             <span>返回</span>
           </button>
-          <div style={{ color: '#EFEFEF' }}>完善吸烟信息</div>
+          <div style={{ color: '#2A2A2A' }}>完善吸烟信息</div>
           <div style={{ width: '60px' }}></div>
         </div>
 
         {/* Description */}
         <div className="text-center mb-8">
-          <p style={{ color: '#888888', fontSize: '14px' }}>
+          <p style={{ color: '#666666', fontSize: '14px' }}>
             帮助我们更准确地计算您的戒烟成果
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
           <div className="space-y-5">
             {/* Smoking Years */}
             <div>
-              <Label style={{ color: '#EFEFEF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Label style={{ color: '#2A2A2A', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Calendar className="w-4 h-4" style={{ color: '#00B894' }} />
                 烟龄
               </Label>
@@ -88,9 +88,9 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
                 <SelectTrigger 
                   className="w-full"
                   style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                    border: '1px solid rgba(189, 189, 189, 0.4)',
-                    color: '#EFEFEF',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid rgba(42, 42, 42, 0.2)',
+                    color: '#2A2A2A',
                   }}
                 >
                   <SelectValue placeholder="请选择烟龄" />
@@ -107,7 +107,7 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
 
             {/* Daily Amount */}
             <div>
-              <Label style={{ color: '#EFEFEF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Label style={{ color: '#2A2A2A', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Cigarette className="w-4 h-4" style={{ color: '#00B894' }} />
                 每日烟量（支）
               </Label>
@@ -120,16 +120,16 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
                 min="1"
                 max="200"
                 style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                  border: '1px solid rgba(189, 189, 189, 0.4)',
-                  color: '#EFEFEF',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid rgba(42, 42, 42, 0.2)',
+                  color: '#2A2A2A',
                 }}
               />
             </div>
 
             {/* Price Per Pack */}
             <div>
-              <Label style={{ color: '#EFEFEF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Label style={{ color: '#2A2A2A', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <DollarSign className="w-4 h-4" style={{ color: '#00B894' }} />
                 香烟单价（元/包）
               </Label>
@@ -143,16 +143,16 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
                 max="500"
                 step="0.1"
                 style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                  border: '1px solid rgba(189, 189, 189, 0.4)',
-                  color: '#EFEFEF',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid rgba(42, 42, 42, 0.2)',
+                  color: '#2A2A2A',
                 }}
               />
             </div>
 
             {/* Cigarettes Per Pack */}
             <div>
-              <Label style={{ color: '#EFEFEF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Label style={{ color: '#2A2A2A', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Package className="w-4 h-4" style={{ color: '#00B894' }} />
                 每包数量（支）
               </Label>
@@ -165,9 +165,9 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
                 min="1"
                 max="100"
                 style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                  border: '1px solid rgba(189, 189, 189, 0.4)',
-                  color: '#EFEFEF',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid rgba(42, 42, 42, 0.2)',
+                  color: '#2A2A2A',
                 }}
               />
             </div>
@@ -188,7 +188,7 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
                   className="mt-1 flex-shrink-0"
                   style={{ accentColor: '#00B894', width: '16px', height: '16px' }}
                 />
-                <span style={{ color: '#EFEFEF', fontSize: '13px', lineHeight: '1.6' }}>
+                <span style={{ color: '#2A2A2A', fontSize: '13px', lineHeight: '1.6' }}>
                   我已阅读并同意
                   <button
                     type="button"
@@ -236,7 +236,7 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
               className="w-full h-12 rounded-xl mt-2"
               style={{
                 backgroundColor: isFormValid() ? '#00B894' : 'rgba(136, 136, 136, 0.3)',
-                color: isFormValid() ? '#1a1a1a' : '#666666',
+                color: isFormValid() ? '#FFFFFF' : '#999999',
                 boxShadow: isFormValid() ? '0 4px 24px rgba(0, 184, 148, 0.35)' : 'none',
                 cursor: isFormValid() ? 'pointer' : 'not-allowed',
               }}
@@ -244,7 +244,7 @@ export default function FirstTimeSetup({ onComplete, onBack }: FirstTimeSetupPro
               确认并打卡
             </Button>
 
-            <p className="text-center" style={{ color: '#888888', fontSize: '12px', marginTop: '12px' }}>
+            <p className="text-center" style={{ color: '#666666', fontSize: '12px', marginTop: '12px' }}>
               提交后将立即完成首次打卡
             </p>
           </div>

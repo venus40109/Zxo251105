@@ -66,16 +66,16 @@ export default function AchievementsPage({
     <div 
       className="min-h-screen p-6"
       style={{
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
+        background: '#EFEFEF',
       }}
     >
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <button onClick={onBack} className="p-2" style={{ color: '#EFEFEF' }}>
+          <button onClick={onBack} className="p-2 rounded-lg transition-all hover:bg-black/5" style={{ color: '#2A2A2A', backgroundColor: 'rgba(42, 42, 42, 0.08)' }}>
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 style={{ color: '#EFEFEF', fontSize: '18px' }}>成就等级</h1>
+          <h1 style={{ color: '#2A2A2A', fontSize: '18px' }}>成就等级</h1>
           <div className="w-10" />
         </div>
 
@@ -85,9 +85,9 @@ export default function AchievementsPage({
           animate={{ y: 0, opacity: 1 }}
           className="rounded-2xl p-6 mb-6"
           style={{
-            background: 'linear-gradient(145deg, rgba(0, 184, 148, 0.15) 0%, rgba(0, 184, 148, 0.05) 100%)',
-            border: '1px solid rgba(0, 184, 148, 0.3)',
-            boxShadow: '0 8px 32px rgba(0, 184, 148, 0.2)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(42, 42, 42, 0.1)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           }}
         >
           <div className="text-center mb-4">
@@ -100,7 +100,7 @@ export default function AchievementsPage({
             >
               <CurrentIcon className="w-10 h-10" style={{ color: currentColor }} />
             </div>
-            <h2 style={{ color: '#EFEFEF', fontSize: '24px', marginBottom: '4px' }}>
+            <h2 style={{ color: '#2A2A2A', fontSize: '24px', marginBottom: '4px' }}>
               {currentRank}
             </h2>
             <div className="flex items-center justify-center gap-1">
@@ -108,15 +108,15 @@ export default function AchievementsPage({
                 <Star key={i} className="w-4 h-4" style={{ color: currentColor }} fill={currentColor} />
               ))}
             </div>
-            <div style={{ color: '#888888', fontSize: '13px', marginTop: '8px' }}>
+            <div style={{ color: '#666666', fontSize: '13px', marginTop: '8px' }}>
               <span style={{ fontWeight: 'bold' }}>{totalDays}</span> 天 · {RANK_SYSTEM[currentRankIndex]?.period}
             </div>
           </div>
 
           {nextRank && (
-            <div className="mt-6 pt-4" style={{ borderTop: '1px solid rgba(189, 189, 189, 0.2)' }}>
+            <div className="mt-6 pt-4" style={{ borderTop: '1px solid rgba(42, 42, 42, 0.1)' }}>
               <div className="flex items-center justify-between mb-2" style={{ fontSize: '13px' }}>
-                <span style={{ color: '#888888' }}>距离 {nextRank.rank}</span>
+                <span style={{ color: '#666666' }}>距离 {nextRank.rank}</span>
                 <span style={{ color: '#00B894', fontWeight: 'bold' }}>{nextRank.minDays - totalDays} 天</span>
               </div>
               <Progress value={progress} className="h-2" />
@@ -128,12 +128,12 @@ export default function AchievementsPage({
         <div 
           className="rounded-2xl p-4 mb-6"
           style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-            border: '1px solid rgba(189, 189, 189, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(42, 42, 42, 0.1)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           }}
         >
-          <h3 style={{ color: '#EFEFEF', marginBottom: '16px' }}>段位进度</h3>
+          <h3 style={{ color: '#2A2A2A', marginBottom: '16px' }}>段位进度</h3>
           <div className="grid grid-cols-2 gap-3">
             {RANK_SYSTEM.map((rank, index) => {
               const Icon = rankIconMap[rank.rank] || Award;
@@ -150,19 +150,19 @@ export default function AchievementsPage({
                   className="relative flex flex-col gap-2 p-3 rounded-lg"
                   style={{
                     backgroundColor: isUnlocked 
-                      ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(189, 189, 189, 0.02)',
+                      ? 'rgba(0, 184, 148, 0.05)' 
+                      : 'rgba(42, 42, 42, 0.02)',
                     border: isCurrent 
                       ? '2px solid rgba(0, 184, 148, 0.4)' 
-                      : `1px solid ${isUnlocked ? 'rgba(189, 189, 189, 0.2)' : 'rgba(189, 189, 189, 0.1)'}`,
+                      : `1px solid ${isUnlocked ? 'rgba(0, 184, 148, 0.2)' : 'rgba(42, 42, 42, 0.1)'}`,
                   }}
                 >
                   {isCurrent && (
                     <div 
                       className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-xs"
                       style={{ 
-                        backgroundColor: 'rgba(0, 184, 148, 0.9)',
-                        color: '#141414',
+                        backgroundColor: '#00B894',
+                        color: '#FFFFFF',
                         fontSize: '10px',
                         fontWeight: 'bold'
                       }}
@@ -174,22 +174,22 @@ export default function AchievementsPage({
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{
-                        backgroundColor: isUnlocked ? `${color}1a` : 'rgba(189, 189, 189, 0.1)',
-                        border: `2px solid ${isUnlocked ? color : 'rgba(189, 189, 189, 0.2)'}`,
+                        backgroundColor: isUnlocked ? `${color}1a` : 'rgba(42, 42, 42, 0.05)',
+                        border: `2px solid ${isUnlocked ? color : 'rgba(42, 42, 42, 0.2)'}`,
                       }}
                     >
                       <Icon 
                         className="w-4 h-4" 
-                        style={{ color: isUnlocked ? color : '#444444' }} 
+                        style={{ color: isUnlocked ? color : '#999999' }} 
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div style={{ color: isUnlocked ? '#EFEFEF' : '#888888', fontSize: '13px', fontWeight: isUnlocked ? '500' : 'normal' }}>
+                      <div style={{ color: isUnlocked ? '#2A2A2A' : '#999999', fontSize: '13px', fontWeight: isUnlocked ? '500' : 'normal' }}>
                         {rank.rank}
                       </div>
                     </div>
                   </div>
-                  <div style={{ color: '#888888', fontSize: '11px', lineHeight: '1.3', textAlign: 'center' }}>
+                  <div style={{ color: '#666666', fontSize: '11px', lineHeight: '1.3', textAlign: 'center' }}>
                     第<span style={{ fontWeight: 'bold' }}>{rank.minDays}</span>-<span style={{ fontWeight: 'bold' }}>{rank.maxDays}</span> 天<br />
                     {rank.period}
                   </div>
@@ -203,12 +203,12 @@ export default function AchievementsPage({
         <div 
           className="rounded-2xl p-4"
           style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-            border: '1px solid rgba(189, 189, 189, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(42, 42, 42, 0.1)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           }}
         >
-          <h3 style={{ color: '#EFEFEF', marginBottom: '16px' }}>连续打卡成就</h3>
+          <h3 style={{ color: '#2A2A2A', marginBottom: '16px' }}>连续打卡成就</h3>
           <div className="grid grid-cols-2 gap-3">
             {consecutiveBadges.map((badge, index) => (
               <motion.div
@@ -220,26 +220,26 @@ export default function AchievementsPage({
                 style={{
                   backgroundColor: badge.achieved 
                     ? 'rgba(0, 184, 148, 0.1)' 
-                    : 'rgba(189, 189, 189, 0.05)',
-                  border: `1px solid ${badge.achieved ? 'rgba(0, 184, 148, 0.3)' : 'rgba(189, 189, 189, 0.1)'}`,
+                    : 'rgba(42, 42, 42, 0.03)',
+                  border: `1px solid ${badge.achieved ? 'rgba(0, 184, 148, 0.3)' : 'rgba(42, 42, 42, 0.1)'}`,
                 }}
               >
                 <div 
                   className="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-2"
                   style={{
-                    backgroundColor: badge.achieved ? 'rgba(0, 184, 148, 0.2)' : 'rgba(189, 189, 189, 0.1)',
-                    border: `2px solid ${badge.achieved ? '#00B894' : 'rgba(189, 189, 189, 0.2)'}`,
+                    backgroundColor: badge.achieved ? 'rgba(0, 184, 148, 0.2)' : 'rgba(42, 42, 42, 0.05)',
+                    border: `2px solid ${badge.achieved ? '#00B894' : 'rgba(42, 42, 42, 0.2)'}`,
                   }}
                 >
                   <Trophy 
                     className="w-6 h-6" 
-                    style={{ color: badge.achieved ? '#00B894' : '#444444' }} 
+                    style={{ color: badge.achieved ? '#00B894' : '#999999' }} 
                   />
                 </div>
-                <div style={{ color: badge.achieved ? '#EFEFEF' : '#888888', fontSize: '13px' }}>
+                <div style={{ color: badge.achieved ? '#2A2A2A' : '#999999', fontSize: '13px' }}>
                   {badge.name}
                 </div>
-                <div style={{ color: '#888888', fontSize: '11px', marginTop: '2px' }}>
+                <div style={{ color: '#666666', fontSize: '11px', marginTop: '2px' }}>
                   {badge.desc}
                 </div>
               </motion.div>

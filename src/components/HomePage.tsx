@@ -35,8 +35,10 @@ interface HomePageProps {
   onCravingRecord: () => void;
 }
 
-function ZXOIcon({ onCravingRecord, hasCheckedInToday }: { onCravingRecord: () => void; hasCheckedInToday: boolean }) {
+function ZXOIcon({ onCravingRecord, hasCheckedInToday, onNavigateToReport }: { onCravingRecord: () => void; hasCheckedInToday: boolean; onNavigateToReport: () => void }) {
   const [isPressed, setIsPressed] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [clickTimer, setClickTimer] = useState<NodeJS.Timeout | null>(null);
 
   const playSound = () => {
     try {
@@ -77,14 +79,38 @@ function ZXOIcon({ onCravingRecord, hasCheckedInToday }: { onCravingRecord: () =
   };
 
   const handleClick = () => {
-    if (!hasCheckedInToday) {
-      toast.error('请先打卡，再记录烟瘾');
-      return;
-    }
     setIsPressed(true);
     playSound();
-    onCravingRecord(); // 记录烟瘾
     setTimeout(() => setIsPressed(false), 300);
+
+    // 处理三次点击逻辑
+    const newClickCount = clickCount + 1;
+    setClickCount(newClickCount);
+
+    // 清除之前的计时器
+    if (clickTimer) {
+      clearTimeout(clickTimer);
+    }
+
+    // 如果点击三次，跳转到数据报告
+    if (newClickCount === 3) {
+      setClickCount(0);
+      setClickTimer(null);
+      onNavigateToReport();
+      return;
+    }
+
+    // 设置10秒后重置计数器
+    const timer = setTimeout(() => {
+      setClickCount(0);
+      setClickTimer(null);
+    }, 10000);
+    setClickTimer(timer);
+
+    // 记录烟瘾（如果已打卡）
+    if (hasCheckedInToday) {
+      onCravingRecord();
+    }
   };
 
   return (
@@ -127,7 +153,7 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
 
   const handleButtonClick = () => {
     if (hasCheckedInToday) {
-      onNavigate('report');
+      onNavigate('share');
     } else {
       handleCheckIn();
     }
@@ -137,7 +163,7 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
     <div 
       className="min-h-screen flex items-center justify-center p-6"
       style={{
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
+        background: '#EFEFEF',
       }}
     >
       <div className="w-full max-w-md">
@@ -147,13 +173,13 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
             <button onClick={() => onNavigate('settings')} style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
               <Avatar className="w-12 h-12 ring-2 ring-offset-2 ring-offset-transparent" style={{ ringColor: '#00B894' }}>
                 <AvatarImage src={userStats.avatar} />
-                <AvatarFallback style={{ backgroundColor: '#00B894', color: '#1a1a1a' }}>
+                <AvatarFallback style={{ backgroundColor: '#00B894', color: '#EFEFEF' }}>
                   {userStats.nickname[0]}
                 </AvatarFallback>
               </Avatar>
             </button>
             <div className="flex-1">
-              <div style={{ color: '#EFEFEF' }} className="mb-1 truncate">{userStats.nickname}</div>
+              <div style={{ color: '#2A2A2A' }} className="mb-1 truncate">{userStats.nickname}</div>
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => onNavigate('achievements')}
@@ -166,32 +192,32 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
               </div>
             </div>
           </div>
-          <ZXOIcon onCravingRecord={onCravingRecord} hasCheckedInToday={hasCheckedInToday} />
+          <ZXOIcon onCravingRecord={onCravingRecord} hasCheckedInToday={hasCheckedInToday} onNavigateToReport={() => onNavigate('report')} />
         </div>
 
         {/* Stats Info Card */}
         <div 
           className="rounded-2xl p-6 mb-6"
           style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-            border: '1px solid rgba(189, 189, 189, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(42, 42, 42, 0.1)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           }}
         >
           <div className="space-y-4">
             {/* Days tracking */}
-            <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: 'rgba(189, 189, 189, 0.15)' }}>
+            <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: 'rgba(42, 42, 42, 0.1)' }}>
               <div>
-                <div style={{ color: '#888888', fontSize: '12px', marginBottom: '4px' }}>已坚持</div>
-                <div style={{ color: '#00B894', fontSize: '24px', fontWeight: 'bold' }}>{userStats.totalDays} <span style={{ fontSize: '14px', color: '#EFEFEF' }}>天</span></div>
+                <div style={{ color: '#666666', fontSize: '12px', marginBottom: '4px' }}>已坚持</div>
+                <div style={{ color: '#00B894', fontSize: '24px', fontWeight: 'bold' }}>{userStats.totalDays} <span style={{ fontSize: '14px', color: '#2A2A2A' }}>天</span></div>
               </div>
               <button 
                 onClick={() => onNavigate('calendar')}
                 className="text-right transition-all hover:opacity-80"
                 style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
               >
-                <div style={{ color: '#888888', fontSize: '12px', marginBottom: '4px' }}>连续打卡</div>
-                <div style={{ color: '#00B894', fontSize: '24px', fontWeight: 'bold' }}>{userStats.consecutiveDays} <span style={{ fontSize: '14px', color: '#EFEFEF' }}>天</span></div>
+                <div style={{ color: '#666666', fontSize: '12px', marginBottom: '4px' }}>连续打卡</div>
+                <div style={{ color: '#00B894', fontSize: '24px', fontWeight: 'bold' }}>{userStats.consecutiveDays} <span style={{ fontSize: '14px', color: '#2A2A2A' }}>天</span></div>
               </button>
             </div>
             
@@ -201,18 +227,18 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
                 className="rounded-lg p-3"
                 style={{ backgroundColor: 'rgba(0, 184, 148, 0.08)', border: '1px solid rgba(0, 184, 148, 0.2)' }}
               >
-                <div style={{ color: '#888888', fontSize: '12px', marginBottom: '6px' }}>少抽</div>
-                <div style={{ color: '#EFEFEF', fontSize: '20px', fontWeight: 'bold' }}>
-                  {userStats.cigarettesAvoided} <span style={{ fontSize: '13px', color: '#888888' }}>根</span>
+                <div style={{ color: '#666666', fontSize: '12px', marginBottom: '6px' }}>少抽</div>
+                <div style={{ color: '#2A2A2A', fontSize: '20px', fontWeight: 'bold' }}>
+                  {userStats.cigarettesAvoided} <span style={{ fontSize: '13px', color: '#666666' }}>根</span>
                 </div>
               </div>
               <div 
                 className="rounded-lg p-3"
                 style={{ backgroundColor: 'rgba(0, 184, 148, 0.08)', border: '1px solid rgba(0, 184, 148, 0.2)' }}
               >
-                <div style={{ color: '#888888', fontSize: '12px', marginBottom: '6px' }}>节约</div>
-                <div style={{ color: '#EFEFEF', fontSize: '20px', fontWeight: 'bold' }}>
-                  {userStats.moneySaved} <span style={{ fontSize: '13px', color: '#888888' }}>元</span>
+                <div style={{ color: '#666666', fontSize: '12px', marginBottom: '6px' }}>节约</div>
+                <div style={{ color: '#2A2A2A', fontSize: '20px', fontWeight: 'bold' }}>
+                  {userStats.moneySaved} <span style={{ fontSize: '13px', color: '#666666' }}>元</span>
                 </div>
               </div>
             </div>
@@ -220,25 +246,25 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
             {/* Equivalent Item */}
             <div 
               className="rounded-lg p-3 flex items-center justify-between"
-              style={{ backgroundColor: 'rgba(189, 189, 189, 0.1)', border: '1px solid rgba(189, 189, 189, 0.2)' }}
+              style={{ backgroundColor: 'rgba(42, 42, 42, 0.03)', border: '1px solid rgba(42, 42, 42, 0.08)' }}
             >
               <div className="flex items-center gap-2">
-                <span style={{ color: '#EFEFEF', fontSize: '14px' }}>节约 约</span>
+                <span style={{ color: '#2A2A2A', fontSize: '14px' }}>节约约</span>
               </div>
               <div className="flex items-center gap-2">
                 <span style={{ color: '#00B894', fontSize: '18px', fontWeight: 'bold' }}>{userStats.equivalentCount}</span>
-                <span style={{ fontSize: '13px', color: '#888888' }}>{userStats.equivalentUnit}</span>
+                <span style={{ fontSize: '13px', color: '#666666' }}>{userStats.equivalentUnit}</span>
                 <EquivalentItemIcon itemName={userStats.equivalentItem} size={20} color="#00B894" />
-                <span style={{ color: '#EFEFEF', fontSize: '14px' }}>{userStats.equivalentItem}</span>
+                <span style={{ color: '#2A2A2A', fontSize: '14px' }}>{userStats.equivalentItem}</span>
               </div>
             </div>
             
             {/* Life extension */}
             <div className="pt-2">
-              <div style={{ color: '#EFEFEF', marginBottom: '6px' }}>
+              <div style={{ color: '#2A2A2A', marginBottom: '6px' }}>
                 您已重获新生 <span style={{ color: '#00B894', fontWeight: 'bold' }}>{userStats.extraLifeDays}</span> 天 <span style={{ color: '#00B894', fontWeight: 'bold' }}>{userStats.extraLifeHours}</span> 小时
               </div>
-              <div style={{ color: '#888888', fontSize: '12px', lineHeight: '1.6' }}>
+              <div style={{ color: '#666666', fontSize: '12px', lineHeight: '1.6' }}>
                 数据基于科学统计，每少抽一根烟，约可延长11分钟寿命
               </div>
             </div>
@@ -252,17 +278,17 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
             className="w-full h-14 rounded-xl"
             style={{
               backgroundColor: hasCheckedInToday ? '#00B894' : '#00B894',
-              color: '#1a1a1a',
+              color: '#FFFFFF',
               border: 'none',
               boxShadow: '0 4px 20px rgba(0, 184, 148, 0.4)',
               cursor: 'pointer',
             }}
           >
-            {hasCheckedInToday ? '数据报告' : '今日打卡'}
+            {hasCheckedInToday ? '分享' : '今日打卡'}
           </Button>
           
           {/* Status Message */}
-          <div className="text-center mt-3" style={{ color: hasError ? '#FF4444' : hasCheckedInToday ? '#888888' : '#888888', fontSize: '13px', lineHeight: '1.6' }}>
+          <div className="text-center mt-3" style={{ color: hasError ? '#FF4444' : hasCheckedInToday ? '#666666' : '#666666', fontSize: '13px', lineHeight: '1.6' }}>
             {hasError ? (
               '网络异常，请重试'
             ) : hasCheckedInToday ? (

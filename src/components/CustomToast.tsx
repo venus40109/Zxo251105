@@ -14,9 +14,9 @@ export function CustomToast({ message, type = 'success' }: CustomToastProps) {
       exit={{ scale: 0.8, opacity: 0 }}
       className="flex flex-col items-center justify-center p-6 rounded-2xl"
       style={{
-        background: 'rgba(45, 45, 45, 0.98)',
-        border: '1px solid rgba(189, 189, 189, 0.3)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+        background: 'rgba(255, 255, 255, 0.98)',
+        border: '1px solid rgba(42, 42, 42, 0.15)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
         minWidth: '200px',
       }}
     >
@@ -37,7 +37,7 @@ export function CustomToast({ message, type = 'success' }: CustomToastProps) {
       <div 
         className="text-center"
         style={{ 
-          color: '#EFEFEF',
+          color: '#2A2A2A',
           fontSize: '16px',
           lineHeight: '1.5'
         }}

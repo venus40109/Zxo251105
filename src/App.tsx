@@ -62,6 +62,7 @@ interface UserStats {
   nextRank: string;
   consecutiveTarget: number;
   makeupCards: number;
+  last7DaysCheckIn: boolean[];
 }
 
 type Page = 'splash' | 'home' | 'achievements' | 'calendar' | 'share' | 'report' | 'settings' | 'setup';
@@ -115,6 +116,17 @@ export default function App() {
     const extraLifeDays = Math.floor(totalMinutes / (24 * 60));
     const extraLifeHours = Math.floor((totalMinutes % (24 * 60)) / 60);
     
+    // 计算最近7天的打卡情况（今天是最后一天）
+    const last7DaysCheckIn: boolean[] = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const hasChecked = userData.checkInRecords.some(record => record.date === dateStr);
+      last7DaysCheckIn.push(hasChecked);
+    }
+    
     return {
       nickname: userData.nickname,
       avatar: userData.avatar,
@@ -132,7 +144,8 @@ export default function App() {
       daysToNextRank: nextRankInfo.daysToNext,
       nextRank: nextRankInfo.nextRank,
       consecutiveTarget: consecutiveDays + 1,
-      makeupCards
+      makeupCards,
+      last7DaysCheckIn
     };
   };
 
@@ -224,7 +237,6 @@ export default function App() {
       setupData: data,
       hasAgreedToTerms: true, // 完成设置即表示已同意协议
     }));
-    setCurrentPage('home');
     
     // 首次设置后自动完成首次打卡
     setTimeout(() => {
@@ -287,19 +299,18 @@ export default function App() {
     
     // 检查是否晋升
     if (newRankInfo.rank !== oldRankInfo.rank) {
-      setTimeout(() => {
-        toast.custom((t) => (
-          <CustomToast message={`恭喜晋升至${newRankInfo.rank}！\n${newRankInfo.promotionMessage}`} />
-        ), {
-          duration: 3000,
-        });
-      }, 500);
-    } else {
       toast.custom((t) => (
-        <CustomToast message="打卡成功！" />
+        <CustomToast message={`恭喜晋升至${newRankInfo.rank}！\n${newRankInfo.promotionMessage}`} />
       ), {
-        duration: 2000,
+        duration: 2500,
       });
+      // 晋升后延迟跳转，让用户看到提示
+      setTimeout(() => {
+        setCurrentPage('share');
+      }, 2500);
+    } else {
+      // 没有晋升，直接跳转到分享页面
+      setCurrentPage('share');
     }
   };
 
@@ -431,9 +442,9 @@ export default function App() {
 
     // 显示提示
     toast.custom((t) => (
-      <CustomToast message="烟瘾记录已保存" />
+      <CustomToast message="本次烟瘾已记录" />
     ), {
-      duration: 1500,
+      duration: 750,
     });
   };
 
@@ -508,7 +519,6 @@ export default function App() {
       return (
         <DataReportPage
           onBack={handleBack}
-          onShare={() => setCurrentPage('share')}
           cravingRecords={userData.cravingRecords}
           totalDays={userStats.totalDays}
           cigarettesAvoided={userStats.cigarettesAvoided}

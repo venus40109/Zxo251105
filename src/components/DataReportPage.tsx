@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, Share2, TrendingDown, TrendingUp } from 'lucide-react';
-import { Button } from './ui/button';
+import { ChevronLeft, TrendingDown, TrendingUp } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface CravingRecord {
@@ -11,7 +10,6 @@ interface CravingRecord {
 
 interface DataReportPageProps {
   onBack: () => void;
-  onShare: () => void;
   cravingRecords: CravingRecord[];
   totalDays: number;
   cigarettesAvoided: number;
@@ -24,7 +22,6 @@ type ViewMode = 'day' | 'week' | 'month';
 
 export default function DataReportPage({
   onBack,
-  onShare,
   cravingRecords,
   totalDays,
   cigarettesAvoided,
@@ -32,7 +29,7 @@ export default function DataReportPage({
   equivalentItem,
   equivalentCount,
 }: DataReportPageProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('week');
+  const [viewMode, setViewMode] = useState<ViewMode>('day');
 
   // 计算数据
   const { chartData, stats, insights } = processData(cravingRecords, viewMode);
@@ -41,7 +38,7 @@ export default function DataReportPage({
     <div
       className="min-h-screen p-6"
       style={{
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
+        background: '#EFEFEF',
       }}
     >
       <div className="w-full max-w-md mx-auto">
@@ -49,24 +46,14 @@ export default function DataReportPage({
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={onBack}
-            className="flex items-center gap-2"
-            style={{ color: '#EFEFEF', background: 'none', border: 'none', cursor: 'pointer' }}
+            className="flex items-center gap-2 p-2 rounded-lg transition-all hover:bg-black/5"
+            style={{ color: '#2A2A2A', backgroundColor: 'rgba(42, 42, 42, 0.08)', border: 'none', cursor: 'pointer' }}
           >
             <ChevronLeft className="w-5 h-5" />
             <span>返回</span>
           </button>
-          <div style={{ color: '#EFEFEF' }}>数据报告</div>
-          <button
-            onClick={onShare}
-            className="p-2 rounded-lg"
-            style={{
-              backgroundColor: 'rgba(0, 184, 148, 0.2)',
-              border: '1px solid rgba(0, 184, 148, 0.3)',
-              cursor: 'pointer',
-            }}
-          >
-            <Share2 className="w-5 h-5" style={{ color: '#00B894' }} />
-          </button>
+          <div style={{ color: '#2A2A2A' }}>数据报告</div>
+          <div style={{ width: '60px' }}></div>
         </div>
 
         {/* 核心指标看板 */}
@@ -96,7 +83,7 @@ export default function DataReportPage({
                 border: '1px solid rgba(0, 184, 148, 0.2)',
               }}
             >
-              <span style={{ color: '#EFEFEF', fontSize: '14px' }}>
+              <span style={{ color: '#2A2A2A', fontSize: '14px' }}>
                 累计节约可购买{' '}
                 <span style={{ color: '#00B894', fontWeight: 'bold' }}>{equivalentCount}</span>{' '}
                 {equivalentItem}
@@ -126,13 +113,13 @@ export default function DataReportPage({
             <div
               className="rounded-2xl p-4 mb-4"
               style={{
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                border: '1px solid rgba(189, 189, 189, 0.2)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                background: '#FFFFFF',
+                border: '1px solid rgba(42, 42, 42, 0.1)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
               }}
             >
               <div className="flex items-center justify-between mb-4">
-                <div style={{ color: '#EFEFEF' }}>烟瘾记录曲线</div>
+                <div style={{ color: '#2A2A2A' }}>烟瘾记录曲线</div>
                 {stats.trend !== 0 && (
                   <div className="flex items-center gap-1">
                     {stats.trend > 0 ? (
@@ -165,10 +152,10 @@ export default function DataReportPage({
                     <YAxis stroke="#888888" tick={{ fill: '#888888', fontSize: 11 }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#2d2d2d',
-                        border: '1px solid rgba(189, 189, 189, 0.2)',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(42, 42, 42, 0.2)',
                         borderRadius: '8px',
-                        color: '#EFEFEF',
+                        color: '#2A2A2A',
                       }}
                     />
                     <Line
@@ -192,10 +179,10 @@ export default function DataReportPage({
                     <YAxis stroke="#888888" tick={{ fill: '#888888', fontSize: 11 }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#2d2d2d',
-                        border: '1px solid rgba(189, 189, 189, 0.2)',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(42, 42, 42, 0.2)',
                         borderRadius: '8px',
-                        color: '#EFEFEF',
+                        color: '#2A2A2A',
                       }}
                     />
                     <Bar dataKey="count" fill="#00B894" radius={[8, 8, 0, 0]} />
@@ -225,7 +212,7 @@ export default function DataReportPage({
           <div style={{ color: '#00B894', marginBottom: '8px' }}>
             💪 数据解读
           </div>
-          <div style={{ color: '#EFEFEF', fontSize: '14px', lineHeight: '1.6' }}>
+          <div style={{ color: '#2A2A2A', fontSize: '14px', lineHeight: '1.6' }}>
             {insights}
           </div>
         </div>
@@ -244,7 +231,7 @@ function StatCard({ label, value, unit }: { label: string; value: string; unit: 
       }}
     >
       <div style={{ color: '#888888', fontSize: '11px', marginBottom: '4px' }}>{label}</div>
-      <div style={{ color: '#EFEFEF', fontSize: '18px', fontWeight: 'bold' }}>
+      <div style={{ color: '#00B894', fontSize: '18px', fontWeight: 'bold' }}>
         {value} <span style={{ fontSize: '12px', color: '#888888' }}>{unit}</span>
       </div>
     </div>
@@ -283,7 +270,7 @@ function processData(records: CravingRecord[], viewMode: ViewMode) {
     return {
       chartData: [],
       stats: { longestStreak: '0', trend: 0, peakTime: null },
-      insights: '暂无烟瘾记录，点击首页品牌图标记录烟瘾，生成你的专属数据曲线。',
+      insights: '首次打卡将完善您的吸烟信息，完成后即可开始记录烟瘾，生成专属数据曲线。',
     };
   }
 

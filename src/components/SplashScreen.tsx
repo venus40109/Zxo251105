@@ -6,7 +6,7 @@ export default function SplashScreen() {
     <div 
       className="min-h-screen flex flex-col items-center justify-center p-6"
       style={{
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
+        background: '#EFEFEF',
       }}
     >
       <motion.div
@@ -59,7 +59,7 @@ export default function SplashScreen() {
           <h1 
             className="mb-2"
             style={{ 
-              color: '#EFEFEF',
+              color: '#2A2A2A',
               fontSize: '36px',
               fontWeight: 'bold',
               letterSpacing: '2px',
@@ -68,7 +68,7 @@ export default function SplashScreen() {
           >
             ZXO
           </h1>
-          <p style={{ color: '#888888', fontSize: '16px' }}>
+          <p style={{ color: '#666666', fontSize: '16px' }}>
             戒烟打卡 · 重获新生
           </p>
         </motion.div>

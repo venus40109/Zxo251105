@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { motion } from 'motion/react';
-import { ChevronLeft, Download, Share2, Star } from 'lucide-react';
+import { ChevronLeft, Download, Share2, Check } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import brandIcon from 'figma:asset/40cd2f47e012cfd7f3053dd617e538f161555e3c.png';
@@ -17,6 +17,7 @@ interface SharePosterProps {
     equivalentUnit: string;
     currentRank: string;
     rankStars: number;
+    last7DaysCheckIn: boolean[]; // 最近7天的打卡情况，true表示已打卡
   };
 }
 
@@ -33,22 +34,39 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
     console.log('Share to WeChat');
   };
 
-  const motto = "每一天的坚持，都是成功的基石";
+  // 获取当前日期信息
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+  const weekDay = weekDays[today.getDay()];
+  const dateString = `${month}月${day}日${weekDay}`;
+
+  // 星期文字（一二三四五六日）
+  const dayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+  
+  // 根据今天是星期几，生成对应的标签
+  const todayIndex = today.getDay(); // 0-6
+  const reorderedLabels = [];
+  for (let i = 0; i < 7; i++) {
+    const labelIndex = (todayIndex - 6 + i + 7) % 7;
+    reorderedLabels.push(dayLabels[labelIndex]);
+  }
 
   return (
     <div 
       className="min-h-screen p-4 flex flex-col"
       style={{
-        background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1f1f1f 100%)',
+        backgroundColor: '#EFEFEF',
       }}
     >
       <div className="max-w-md mx-auto w-full flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <button onClick={onBack} className="p-2" style={{ color: '#EFEFEF' }}>
+          <button onClick={onBack} className="p-2 rounded-lg transition-all hover:bg-black/5" style={{ color: '#2A2A2A', backgroundColor: 'rgba(42, 42, 42, 0.08)' }}>
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 style={{ color: '#EFEFEF', fontSize: '18px' }}>分享海报</h1>
+          <h1 style={{ color: '#2A2A2A', fontSize: '18px' }}>分享海报</h1>
           <div className="w-10" />
         </div>
 
@@ -57,176 +75,195 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
           ref={posterRef}
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="rounded-2xl overflow-hidden mb-3 flex-1"
+          className="rounded-2xl overflow-hidden flex-1"
           style={{
-            background: '#FFFFFF',
+            backgroundColor: '#EFEFEF',
             boxShadow: '0 12px 48px rgba(0, 0, 0, 0.5)',
             minHeight: 0,
           }}
         >
           <div className="h-full flex flex-col p-6 relative">
-            {/* Decorative Lines */}
-            <div 
-              className="absolute top-0 left-0 w-full h-1"
-              style={{ background: 'linear-gradient(90deg, transparent, #00B894, transparent)' }}
-            />
-            <div 
-              className="absolute bottom-0 left-0 w-full h-1"
-              style={{ background: 'linear-gradient(90deg, transparent, #00B894, transparent)' }}
-            />
-            <div 
-              className="absolute left-0 top-0 w-1 h-full"
-              style={{ background: 'linear-gradient(180deg, transparent, #00B894, transparent)' }}
-            />
-            <div 
-              className="absolute right-0 top-0 w-1 h-full"
-              style={{ background: 'linear-gradient(180deg, transparent, #00B894, transparent)' }}
-            />
-
-            {/* Decorative Corners */}
-            <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2" style={{ borderColor: '#00B894' }} />
-            <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2" style={{ borderColor: '#00B894' }} />
-            <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2" style={{ borderColor: '#00B894' }} />
-            <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2" style={{ borderColor: '#00B894' }} />
-
-            {/* Content */}
-            <div className="flex-1 flex flex-col">
-              {/* User Info */}
-              <div className="text-center mb-4 mt-6">
-                <Avatar className="w-20 h-20 mx-auto mb-3 ring-4 ring-offset-4" style={{ ringColor: '#00B894' }}>
-                  <AvatarImage src={userStats.avatar} />
-                  <AvatarFallback style={{ backgroundColor: '#00B894', color: '#141414' }}>
-                    {userStats.nickname[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div style={{ color: '#141414', fontSize: '20px', marginBottom: '6px' }}>
-                  {userStats.nickname}
+            {/* 左上角品牌 */}
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <img 
+                src={brandIcon} 
+                alt="ZXO Logo" 
+                style={{ width: '32px', height: '32px' }}
+              />
+              <div>
+                <div style={{ color: '#2A2A2A', fontSize: '16px', letterSpacing: '1px' }}>
+                  ZXO
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="flex items-center gap-1 px-3 py-1 rounded" style={{ backgroundColor: 'rgba(0, 184, 148, 0.1)', border: '1px solid rgba(0, 184, 148, 0.3)' }}>
-                    <Star className="w-3 h-3" style={{ color: '#00B894' }} fill="#00B894" />
-                    <span style={{ color: '#00B894', fontSize: '12px' }}>{userStats.currentRank} <span style={{ fontWeight: 'bold' }}>{userStats.rankStars}</span>星</span>
-                  </div>
+                <div style={{ color: '#666666', fontSize: '11px' }}>
+                  戒烟打卡
                 </div>
               </div>
+            </div>
 
-              {/* Motto - 移到这里，在段位和统计数据之间 */}
-              <div className="text-center mb-4">
-                <p style={{ color: '#888888', fontSize: '13px', fontStyle: 'italic', lineHeight: '1.5' }}>
-                  "{motto}"
-                </p>
-              </div>
-
-              {/* Stats */}
-              <div 
-                className="rounded-xl p-5 mb-6"
-                style={{
-                  backgroundColor: 'rgba(0, 184, 148, 0.05)',
-                  border: '2px solid #00B894',
+            {/* 右上角功能图标 */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <button 
+                onClick={handleDownload}
+                className="p-2 rounded-lg transition-colors hover:opacity-70"
+                style={{ 
+                  color: '#2A2A2A',
+                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
                 }}
               >
-                <div className="text-center mb-3">
-                  <div style={{ color: '#888888', fontSize: '12px', marginBottom: '4px' }}>
-                    已坚持戒烟
-                  </div>
-                  <div style={{ color: '#00B894', fontSize: '36px', fontWeight: '900', lineHeight: '1' }}>
-                    {userStats.totalDays}
-                  </div>
-                  <div style={{ color: '#141414', fontSize: '14px', marginTop: '2px' }}>
-                    天
-                  </div>
-                </div>
+                <Download className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={handleShare}
+                className="p-2 rounded-lg transition-colors hover:opacity-70"
+                style={{ 
+                  color: '#2A2A2A',
+                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                }}
+              >
+                <Share2 className="w-5 h-5" />
+              </button>
+            </div>
 
-                <div className="border-t pt-3" style={{ borderColor: 'rgba(0, 184, 148, 0.2)' }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span style={{ color: '#888888', fontSize: '13px' }}>累计节省</span>
-                    <span style={{ color: '#00B894', fontSize: '18px', fontWeight: 'bold' }}>{userStats.moneySaved} 元</span>
+            {/* 中间内容 */}
+            <div className="flex-1 flex flex-col justify-center mt-12">
+              {/* 胜利对号带光芒 */}
+              <div className="relative mb-6 flex justify-center">
+                {/* 旋转光芒效果 */}
+                <motion.div 
+                  className="absolute inset-0 flex items-center justify-center"
+                  animate={{ rotate: 360 }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                >
+                  {[...Array(12)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute"
+                      style={{
+                        width: '90px',
+                        height: '3px',
+                        background: 'linear-gradient(90deg, transparent, rgba(0, 184, 148, 0.6), transparent)',
+                        transform: `rotate(${i * 30}deg)`,
+                        transformOrigin: 'center',
+                      }}
+                    />
+                  ))}
+                </motion.div>
+                {/* 对号 */}
+                <div 
+                  className="relative z-10 rounded-full flex items-center justify-center"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    background: 'linear-gradient(135deg, #00B894, #00D9A3)',
+                    boxShadow: '0 8px 24px rgba(0, 184, 148, 0.4)',
+                  }}
+                >
+                  <Check className="w-12 h-12" style={{ color: '#FFFFFF', strokeWidth: 4 }} />
+                </div>
+              </div>
+
+              {/* 左右分栏 */}
+              <div className="flex gap-4 mb-6">
+                {/* 左侧：头像、昵称、段位 */}
+                <div className="flex flex-col items-center" style={{ flex: '0 0 130px' }}>
+                  <Avatar className="w-20 h-20 mb-2 ring-2" style={{ ringColor: '#00B894' }}>
+                    <AvatarImage src={userStats.avatar} />
+                    <AvatarFallback style={{ backgroundColor: '#00B894', color: '#FFFFFF' }}>
+                      {userStats.nickname[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div style={{ color: '#2A2A2A', fontSize: '16px', marginBottom: '6px' }}>
+                    {userStats.nickname}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span style={{ color: '#888888', fontSize: '13px' }}>相当于</span>
-                    <span style={{ color: '#00B894', fontSize: '15px' }}>
-                      {userStats.equivalentItem} <span style={{ fontWeight: 'bold' }}>{userStats.equivalentCount}</span> {userStats.equivalentUnit}
+                  <div 
+                    className="flex items-center gap-1 px-2 py-1 rounded"
+                    style={{ 
+                      backgroundColor: 'rgba(0, 184, 148, 0.15)',
+                      border: '1px solid rgba(0, 184, 148, 0.4)',
+                    }}
+                  >
+                    <span style={{ color: '#00B894', fontSize: '11px' }}>
+                      {userStats.currentRank} <span style={{ fontWeight: 'bold' }}>{userStats.rankStars}</span>星
                     </span>
                   </div>
                 </div>
-              </div>
 
-              {/* Footer - ZXO品牌、引导文字、二维码 */}
-              <div className="mt-auto">
-                <div className="flex items-center justify-between gap-3">
-                  {/* 左侧：ZXO Logo和文字 */}
-                  <div className="flex flex-col items-start flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <img 
-                        src={brandIcon} 
-                        alt="ZXO Logo" 
-                        style={{ width: '32px', height: '32px' }}
-                      />
-                      <div>
-                        <div style={{ color: '#141414', fontSize: '15px', letterSpacing: '1px' }}>
-                          ZXO
-                        </div>
-                        <div style={{ color: '#888888', fontSize: '10px' }}>
-                          戒烟打卡
-                        </div>
-                      </div>
-                    </div>
-                    <p style={{ color: '#888888', fontSize: '11px', lineHeight: '1.4' }}>
-                      扫码加入，一起戒烟，重获新生
-                    </p>
+                {/* 右侧：统计数据 */}
+                <div className="flex-1 flex flex-col justify-center gap-2 items-center">
+                  {/* 第一行：已坚持戒烟 */}
+                  <div style={{ color: '#2A2A2A', fontSize: '14px' }}>
+                    已坚持戒烟<span style={{ color: '#00B894', fontWeight: 'bold' }}>{userStats.totalDays}</span>天
                   </div>
                   
-                  {/* 右侧：二维码占位 */}
-                  <div 
-                    className="flex-shrink-0 rounded-lg flex items-center justify-center"
-                    style={{
-                      width: '75px',
-                      height: '75px',
-                      backgroundColor: 'rgba(0, 184, 148, 0.08)',
-                      border: '2px solid rgba(0, 184, 148, 0.3)',
-                    }}
-                  >
-                    <div style={{ color: '#00B894', fontSize: '10px', textAlign: 'center', padding: '6px' }}>
-                      小程序<br />二维码
-                    </div>
+                  {/* 第二行：累计节省 */}
+                  <div style={{ color: '#2A2A2A', fontSize: '14px' }}>
+                    累计节省<span style={{ color: '#00B894', fontWeight: 'bold' }}>{userStats.moneySaved}</span>元
                   </div>
+                  
+                  {/* 第三行：相当于 */}
+                  <div style={{ color: '#2A2A2A', fontSize: '14px' }}>
+                    相当于{userStats.equivalentItem}<span style={{ color: '#00B894', fontWeight: 'bold' }}>{userStats.equivalentCount}</span>{userStats.equivalentUnit}
+                  </div>
+                </div>
+              </div>
+
+              {/* 7天打卡情况 */}
+              <div 
+                className="rounded-xl p-4 mb-4"
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                }}
+              >
+                <div className="flex justify-between">
+                  {userStats.last7DaysCheckIn.map((checked, index) => (
+                    <div key={index} className="flex flex-col items-center">
+                      <div style={{ color: '#888888', fontSize: '11px', marginBottom: '6px' }}>
+                        {reorderedLabels[index]}
+                      </div>
+                      <div
+                        className="rounded-full flex items-center justify-center"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          backgroundColor: checked ? '#00B894' : '#FFFFFF',
+                          border: checked ? 'none' : '1px solid rgba(0, 0, 0, 0.15)',
+                        }}
+                      >
+                        {checked && <Check className="w-4 h-4" style={{ color: '#FFFFFF', strokeWidth: 3 }} />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Slogan */}
+              <div className="text-center mb-3">
+                <div style={{ color: '#2A2A2A', fontSize: '18px', letterSpacing: '0.5px' }}>
+                  Not Quit,But Upgrade.
+                </div>
+              </div>
+
+              {/* 鼓励文字 */}
+              <div className="text-center mb-3">
+                <p style={{ color: '#666666', fontSize: '12px', lineHeight: '1.6' }}>
+                  加油！争取成功度过最难熬的头7天。<br />每天不吸烟就是一场胜利。
+                </p>
+              </div>
+
+              {/* 日期 */}
+              <div className="text-center">
+                <div style={{ color: '#999999', fontSize: '12px' }}>
+                  {dateString}
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 flex-shrink-0">
-          <Button
-            onClick={handleDownload}
-            className="h-12 rounded-xl"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(189, 189, 189, 0.5)',
-              color: '#EFEFEF',
-            }}
-          >
-            <Download className="w-5 h-5 mr-2" />
-            保存到相册
-          </Button>
-          <Button
-            onClick={handleShare}
-            className="h-12 rounded-xl"
-            style={{
-              backgroundColor: '#00B894',
-              color: '#1a1a1a',
-              boxShadow: '0 4px 24px rgba(0, 184, 148, 0.35)',
-            }}
-          >
-            <Share2 className="w-5 h-5 mr-2" />
-            分享到微信
-          </Button>
-        </div>
-
-        <p className="text-center mt-4" style={{ color: '#888888', fontSize: '12px' }}>
-          分享你的成就，激励更多人加入戒烟行列
-        </p>
       </div>
     </div>
   );

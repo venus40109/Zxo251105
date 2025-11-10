@@ -20,8 +20,8 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
       <div
         className="w-full max-w-md rounded-2xl p-6"
         style={{
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
-          border: '1px solid rgba(189, 189, 189, 0.2)',
+          background: '#FFFFFF',
+          border: '1px solid rgba(42, 42, 42, 0.1)',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
           maxHeight: '85vh',
           display: 'flex',
@@ -30,11 +30,11 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <div style={{ color: '#EFEFEF' }}>用户协议</div>
+          <div style={{ color: '#2A2A2A' }}>用户协议</div>
           <button
             onClick={onCancel}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors"
-            style={{ color: '#888888' }}
+            className="p-1 rounded-lg hover:bg-black/5 transition-colors"
+            style={{ color: '#666666' }}
           >
             <X className="w-5 h-5" />
           </button>
@@ -46,9 +46,9 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
             onClick={() => setActiveTab('privacy')}
             className="flex-1 py-2 px-4 rounded-lg transition-all"
             style={{
-              backgroundColor: activeTab === 'privacy' ? 'rgba(0, 184, 148, 0.2)' : 'rgba(189, 189, 189, 0.1)',
-              border: activeTab === 'privacy' ? '1px solid rgba(0, 184, 148, 0.4)' : '1px solid rgba(189, 189, 189, 0.2)',
-              color: activeTab === 'privacy' ? '#00B894' : '#888888',
+              backgroundColor: activeTab === 'privacy' ? 'rgba(0, 184, 148, 0.15)' : 'rgba(42, 42, 42, 0.05)',
+              border: activeTab === 'privacy' ? '1px solid rgba(0, 184, 148, 0.4)' : '1px solid rgba(42, 42, 42, 0.1)',
+              color: activeTab === 'privacy' ? '#00B894' : '#666666',
               fontSize: '14px',
             }}
           >
@@ -58,9 +58,9 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
             onClick={() => setActiveTab('terms')}
             className="flex-1 py-2 px-4 rounded-lg transition-all"
             style={{
-              backgroundColor: activeTab === 'terms' ? 'rgba(0, 184, 148, 0.2)' : 'rgba(189, 189, 189, 0.1)',
-              border: activeTab === 'terms' ? '1px solid rgba(0, 184, 148, 0.4)' : '1px solid rgba(189, 189, 189, 0.2)',
-              color: activeTab === 'terms' ? '#00B894' : '#888888',
+              backgroundColor: activeTab === 'terms' ? 'rgba(0, 184, 148, 0.15)' : 'rgba(42, 42, 42, 0.05)',
+              border: activeTab === 'terms' ? '1px solid rgba(0, 184, 148, 0.4)' : '1px solid rgba(42, 42, 42, 0.1)',
+              color: activeTab === 'terms' ? '#00B894' : '#666666',
               fontSize: '14px',
             }}
           >
@@ -76,7 +76,7 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
             overflowY: 'auto',
           }}
         >
-          <div style={{ color: '#EFEFEF', fontSize: '13px', lineHeight: '1.8', paddingRight: '8px' }}>
+          <div style={{ color: '#2A2A2A', fontSize: '13px', lineHeight: '1.8', paddingRight: '8px' }}>
             {activeTab === 'privacy' ? <PrivacyPolicy /> : <TermsOfService />}
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
               className="mt-1"
               style={{ accentColor: '#00B894' }}
             />
-            <span style={{ color: '#EFEFEF', fontSize: '13px' }}>
+            <span style={{ color: '#2A2A2A', fontSize: '13px' }}>
               我已阅读并同意《ZXO个人信息保护政策》
             </span>
           </label>
@@ -103,7 +103,7 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
               className="mt-1"
               style={{ accentColor: '#00B894' }}
             />
-            <span style={{ color: '#EFEFEF', fontSize: '13px' }}>
+            <span style={{ color: '#2A2A2A', fontSize: '13px' }}>
               我已阅读并同意《ZXO用户服务协议》
             </span>
           </label>
@@ -115,9 +115,9 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
             onClick={onCancel}
             className="flex-1 py-3 rounded-lg"
             style={{
-              backgroundColor: 'rgba(189, 189, 189, 0.1)',
-              border: '1px solid rgba(189, 189, 189, 0.2)',
-              color: '#EFEFEF',
+              backgroundColor: 'rgba(42, 42, 42, 0.08)',
+              border: '1px solid rgba(42, 42, 42, 0.2)',
+              color: '#2A2A2A',
             }}
           >
             取消
@@ -127,8 +127,8 @@ export default function AgreementDialog({ onAgree, onCancel }: AgreementDialogPr
             disabled={!canAgree}
             className="flex-1 py-3 rounded-lg"
             style={{
-              backgroundColor: canAgree ? '#00B894' : 'rgba(189, 189, 189, 0.2)',
-              color: canAgree ? '#1a1a1a' : '#888888',
+              backgroundColor: canAgree ? '#00B894' : 'rgba(42, 42, 42, 0.2)',
+              color: canAgree ? '#FFFFFF' : '#999999',
               border: 'none',
               cursor: canAgree ? 'pointer' : 'not-allowed',
               opacity: canAgree ? 1 : 0.5,
@@ -177,7 +177,7 @@ function PrivacyPolicy() {
         <li style={{ marginBottom: '6px' }}>与我们联系</li>
       </ul>
 
-      <h4 style={{ color: '#EFEFEF', marginTop: '20px', marginBottom: '12px', fontSize: '14px' }}>一、适用范围</h4>
+      <h4 style={{ color: '#2A2A2A', marginTop: '20px', marginBottom: '12px', fontSize: '14px' }}>一、适用范围</h4>
       <p style={{ marginBottom: '16px' }}>
         本政策适用于您通过"ZXO自由呼吸"小程序使用我们提供的各项服务。如我们关联公司的产品或服务中使用了"ZXO自由呼吸"小程序提供的服务但未设独立个人信息保护政策的，则本政策同样适用于该部分服务。
       </p>
@@ -336,8 +336,8 @@ export function ViewAgreementDialog({
       <div
         className="w-full max-w-md rounded-2xl p-6"
         style={{
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
-          border: '1px solid rgba(189, 189, 189, 0.2)',
+          background: '#FFFFFF',
+          border: '1px solid rgba(42, 42, 42, 0.1)',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
           maxHeight: '85vh',
           display: 'flex',
@@ -346,13 +346,13 @@ export function ViewAgreementDialog({
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <div style={{ color: '#EFEFEF' }}>
+          <div style={{ color: '#2A2A2A' }}>
             {type === 'privacy' ? 'ZXO个人信息保护政策' : 'ZXO用户服务协议'}
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors"
-            style={{ color: '#888888' }}
+            className="p-1 rounded-lg hover:bg-black/5 transition-colors"
+            style={{ color: '#666666' }}
           >
             <X className="w-5 h-5" />
           </button>
@@ -366,7 +366,7 @@ export function ViewAgreementDialog({
             overflowY: 'auto',
           }}
         >
-          <div style={{ color: '#EFEFEF', fontSize: '13px', lineHeight: '1.8', paddingRight: '8px' }}>
+          <div style={{ color: '#2A2A2A', fontSize: '13px', lineHeight: '1.8', paddingRight: '8px' }}>
             {type === 'privacy' ? <PrivacyPolicy /> : <TermsOfService />}
           </div>
         </div>
@@ -377,7 +377,7 @@ export function ViewAgreementDialog({
           className="w-full py-3 rounded-lg"
           style={{
             backgroundColor: '#00B894',
-            color: '#1a1a1a',
+            color: '#FFFFFF',
             border: 'none',
           }}
         >
