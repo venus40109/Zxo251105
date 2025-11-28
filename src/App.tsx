@@ -555,7 +555,7 @@ export default function App() {
       );
     
     case 'share':
-      return <SharePoster onBack={handleBack} userStats={userStats} userRanking={userStats.totalDays > 0 ? Math.floor(Math.random() * 500) + 1 : undefined} />;
+      return <SharePoster onBack={handleBack} userStats={userStats} userRanking={userStats.totalDays > 0 ? Math.floor(Math.random() * 500) + 1 : undefined} memberType={userData.memberType} localRanking={5} localRegionName="朝阳区" />;
     
     case 'report':
       return (
@@ -567,6 +567,10 @@ export default function App() {
           moneySaved={userStats.moneySaved}
           equivalentItem={userStats.equivalentItem}
           equivalentCount={userStats.equivalentCount}
+          memberType={userData.memberType}
+          onNavigateToHealthReport={() => setCurrentPage('healthReport')}
+          hasCheckedInToday={hasCheckedInToday}
+          onCravingRecord={handleCravingRecord}
         />
       );
     

@@ -148,6 +148,9 @@ export default function RankingPage({
   const [showSheet, setShowSheet] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
 
+  // 判断是否有VIP权限（VIP或AI会员）
+  const hasVIPAccess = memberType === 'vip' || memberType === 'ai';
+
   // 当前用户信息
   const currentUser: RankingUser = {
     id: 'current-user',
@@ -164,14 +167,26 @@ export default function RankingPage({
     memberLevel: 'Plus',
   };
 
-  // 区域选项
-  const regionOptions: RegionOption[] = [
+  // 区域选项 - 根据权限过滤
+  const allRegionOptions: RegionOption[] = [
     { level: 'national', name: '全国榜', emoji: '🇨🇳', rank: 1024 },
     { level: 'province', name: `${currentUser.province}榜`, emoji: '🏙️', rank: 158 },
     { level: 'city', name: `${currentUser.city}榜`, emoji: '🌆', rank: 42 },
     { level: 'district', name: `${currentUser.district}榜`, emoji: '🏘️', rank: 5, isHighlight: true },
     { level: 'street', name: `${currentUser.street}榜`, emoji: '🛣️', rank: 1, isHighlight: true },
   ];
+
+  // 根据会员等级过滤可用区域
+  const regionOptions = hasVIPAccess 
+    ? allRegionOptions 
+    : allRegionOptions.filter(option => option.level === 'district' || option.level === 'street');
+
+  // 当会员等级变化时，如果当前选中的区域不可用，则重置为 district
+  useEffect(() => {
+    if (!hasVIPAccess && (currentLevel === 'national' || currentLevel === 'province' || currentLevel === 'city')) {
+      setCurrentLevel('district');
+    }
+  }, [memberType, hasVIPAccess, currentLevel]);
 
   const currentRegion = regionOptions.find(r => r.level === currentLevel);
 
@@ -456,7 +471,7 @@ export default function RankingPage({
         </div>
       </div>
 
-      {/* 切换菜单 (Action Sheet) */}
+      {/* 切换菜单 (Modal) */}
       <AnimatePresence>
         {showSheet && (
           <>
@@ -464,81 +479,97 @@ export default function RankingPage({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50"
+              className="fixed inset-0 z-50 flex items-center justify-center p-6"
               style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
               onClick={() => setShowSheet(false)}
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-0 w-full bg-white rounded-t-3xl z-50 pb-8 shadow-2xl"
             >
-              <div 
-                className="w-12 h-1.5 rounded-full mx-auto mt-3 mb-6"
-                style={{ backgroundColor: '#E5E7EB' }}
-              />
-              <h3 className="text-center mb-2" style={{ color: '#2A2A2A', fontSize: '16px', fontWeight: 'bold' }}>
-                选择查看范围
-              </h3>
-              <p className="text-center mb-6" style={{ color: '#999999', fontSize: '12px' }}>
-                系统已自动为您定位最高排名
-              </p>
-              
-              <div className="px-4 space-y-2">
-                {regionOptions.map((option) => {
-                  const isActive = option.level === currentLevel;
-                  const isBest = option.rank === 1;
-                  const isNational = option.level === 'national';
-                  const isProvince = option.level === 'province';
-                  const isCity = option.level === 'city';
-                  const needsVIP = (isNational || isProvince || isCity) && !isVIP;
-                  
-                  return (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="bg-white rounded-3xl shadow-2xl w-full max-w-md"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 style={{ color: '#2A2A2A', fontSize: '16px', fontWeight: 'bold' }}>
+                      选择查看范围
+                    </h3>
                     <button
-                      key={option.level}
-                      onClick={() => {
-                        if (needsVIP) {
-                          setShowSheet(false);
-                          onNavigateToSettings?.();
-                        } else {
-                          setCurrentLevel(option.level);
-                          setShowSheet(false);
-                        }
-                      }}
-                      className="w-full p-4 flex justify-between items-center rounded-2xl transition-all active:scale-95"
+                      onClick={() => setShowSheet(false)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full transition-all hover:bg-gray-100"
+                    >
+                      <X className="w-5 h-5" style={{ color: '#666666' }} />
+                    </button>
+                  </div>
+                  <p className="text-center mb-4" style={{ color: '#999999', fontSize: '12px' }}>
+                    系统已自动为您定位最高排名
+                  </p>
+
+                  {/* VIP未开通提示 */}
+                  {!hasVIPAccess && (
+                    <div 
+                      className="rounded-xl p-3 mb-4 text-center"
                       style={{
-                        backgroundColor: isActive ? 'rgba(0, 184, 148, 0.1)' : '#F9FAFB',
-                        border: isActive ? '1px solid rgba(0, 184, 148, 0.3)' : '1px solid transparent',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        border: '1px solid rgba(245, 158, 11, 0.3)',
                       }}
                     >
-                      <div className="flex items-center space-x-3">
-                        <span className="text-2xl">{option.emoji}</span>
-                        <div className="text-left">
-                          <div style={{ 
-                            color: isActive ? '#00B894' : '#2A2A2A',
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                          }}>
-                            {option.name}
-                          </div>
-                          <div style={{ 
-                            color: needsVIP ? '#F59E0B' : isBest ? '#F59E0B' : isActive ? '#00B894' : '#999999',
-                            fontSize: '12px',
-                            fontWeight: needsVIP || isBest ? 'bold' : 'normal',
-                          }}>
-                            {needsVIP ? '开通VIP查看更多榜单' : (isBest ? '👑 您是第 1 名！' : `您排名第 ${option.rank} 名`)}
-                            {isActive && !needsVIP && ' · 当前显示'}
-                          </div>
-                        </div>
+                      <div style={{ color: '#F59E0B', fontSize: '13px', fontWeight: 'bold' }}>
+                        🔒 全国排名未开通
                       </div>
-                      {isActive && !needsVIP && <Check className="w-5 h-5" style={{ color: '#00B894' }} />}
-                      {needsVIP && <ChevronRight className="w-5 h-5" style={{ color: '#F59E0B' }} />}
-                    </button>
-                  );
-                })}
-              </div>
+                      <div style={{ color: '#999999', fontSize: '11px', marginTop: '4px' }}>
+                        开通VIP可查看全国/省/市榜单
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {regionOptions.map((option) => {
+                      const isActive = option.level === currentLevel;
+                      const isBest = option.rank === 1;
+                      
+                      return (
+                        <button
+                          key={option.level}
+                          onClick={() => {
+                            setCurrentLevel(option.level);
+                            setShowSheet(false);
+                          }}
+                          className="w-full p-4 flex justify-between items-center rounded-2xl transition-all active:scale-95"
+                          style={{
+                            backgroundColor: isActive ? 'rgba(0, 184, 148, 0.1)' : '#F9FAFB',
+                            border: isActive ? '1px solid rgba(0, 184, 148, 0.3)' : '1px solid transparent',
+                          }}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">{option.emoji}</span>
+                            <div className="text-left">
+                              <div style={{ 
+                                color: isActive ? '#00B894' : '#2A2A2A',
+                                fontSize: '14px',
+                                fontWeight: 'bold',
+                              }}>
+                                {option.name}
+                              </div>
+                              <div style={{ 
+                                color: isBest ? '#F59E0B' : isActive ? '#00B894' : '#999999',
+                                fontSize: '12px',
+                                fontWeight: isBest ? 'bold' : 'normal',
+                              }}>
+                                {isBest ? '👑 您是第 1 名！' : `您排名第 ${option.rank} 名`}
+                                {isActive && ' · 当前显示'}
+                              </div>
+                            </div>
+                          </div>
+                          {isActive && <Check className="w-5 h-5" style={{ color: '#00B894' }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           </>
         )}

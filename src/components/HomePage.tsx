@@ -109,11 +109,6 @@ function ZXOIcon({ onCravingRecord, hasCheckedInToday, onNavigateToReport }: { o
       setClickTimer(null);
     }, 10000);
     setClickTimer(timer);
-
-    // 记录烟瘾（如果已打卡）
-    if (hasCheckedInToday) {
-      onCravingRecord();
-    }
   };
 
   return (
@@ -271,7 +266,7 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
               style={{ backgroundColor: 'rgba(42, 42, 42, 0.03)', border: '1px solid rgba(42, 42, 42, 0.08)' }}
             >
               <div className="flex items-center gap-2">
-                <span style={{ color: '#2A2A2A', fontSize: '14px' }}>节约约</span>
+                <span style={{ color: '#2A2A2A', fontSize: '14px' }}>相当于</span>
               </div>
               <div className="flex items-center gap-2">
                 <span style={{ color: '#00B894', fontSize: '18px', fontWeight: 'bold' }}>{userStats.equivalentCount}</span>
@@ -296,26 +291,26 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
         {/* AI 戒烟助手 */}
         <button
           onClick={() => onNavigate('aiChat')}
-          className="w-full rounded-xl p-4 mb-6 transition-all active:scale-98"
+          className="w-full rounded-xl p-3 mb-6 transition-all active:scale-98"
           style={{ 
             background: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
             border: 'none',
-            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+            boxShadow: '0 2px 8px rgba(102, 126, 234, 0.25)',
           }}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center"
+                className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
               >
-                <span style={{ fontSize: '20px' }}>🤖</span>
+                <span style={{ fontSize: '18px' }}>🤖</span>
               </div>
               <div className="text-left">
-                <div style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: 'bold', marginBottom: '2px' }}>
+                <div style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 'bold', marginBottom: '2px' }}>
                   AI 戒烟助手
                 </div>
-                <div style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '12px' }}>
+                <div style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '11px' }}>
                   专业戒烟指导，随时陪伴您
                 </div>
               </div>

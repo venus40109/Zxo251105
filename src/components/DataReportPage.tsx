@@ -1,6 +1,10 @@
-import { useState } from 'react';
-import { ChevronLeft, TrendingDown, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { ChevronLeft, TrendingDown, TrendingUp, Bell } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import BrandLogo from './BrandLogo';
+import { toast } from 'sonner@2.0.3';
+import { CustomToast } from './CustomToast';
 
 interface CravingRecord {
   timestamp: number;
@@ -16,6 +20,10 @@ interface DataReportPageProps {
   moneySaved: number;
   equivalentItem: string;
   equivalentCount: number;
+  memberType: 'free' | 'vip' | 'ai';
+  onNavigateToHealthReport: () => void;
+  hasCheckedInToday: boolean;
+  onCravingRecord: () => void;
 }
 
 type ViewMode = 'day' | 'week' | 'month';
@@ -28,8 +36,23 @@ export default function DataReportPage({
   moneySaved,
   equivalentItem,
   equivalentCount,
+  memberType,
+  onNavigateToHealthReport,
+  hasCheckedInToday,
+  onCravingRecord,
 }: DataReportPageProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('day');
+  const [hasShownPrompt, setHasShownPrompt] = useState(false);
+
+  // 首次进入页面时，如果已打卡且未显示过提示，则提示可以记录烟瘾
+  useEffect(() => {
+    if (hasCheckedInToday && !hasShownPrompt) {
+      setHasShownPrompt(true);
+      toast.custom((t) => (
+        <CustomToast message="点击品牌Logo可记录烟瘾" />
+      ), { duration: 2000 });
+    }
+  }, [hasCheckedInToday, hasShownPrompt]);
 
   // 计算数据
   const { chartData, stats, insights } = processData(cravingRecords, viewMode);
@@ -51,61 +74,78 @@ export default function DataReportPage({
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 style={{ color: '#2A2A2A', fontSize: '16px', fontWeight: 'bold' }}>数据报告</h1>
+          <h1 style={{ color: '#2A2A2A', fontSize: '16px', fontWeight: 'bold' }}>烟瘾数据报告</h1>
           <div className="w-8"></div>
         </div>
 
-        {/* 核心指标看板 */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <StatCard
-                label="少抽根数"
-                value={cigarettesAvoided.toString()}
-                unit="根"
-              />
-              <StatCard
-                label="节约金额"
-                value={moneySaved.toString()}
-                unit="元"
-              />
-              <StatCard
-                label="最长无瘾"
-                value={stats.longestStreak}
-                unit="小时"
-              />
-            </div>
-
-            {/* 等价物提示 */}
-            <div
-              className="rounded-lg p-3 mb-6 text-center"
-              style={{
-                backgroundColor: 'rgba(0, 184, 148, 0.1)',
-                border: '1px solid rgba(0, 184, 148, 0.2)',
-              }}
-            >
-              <span style={{ color: '#2A2A2A', fontSize: '14px' }}>
-                累计节约可购买{' '}
-                <span style={{ color: '#00B894', fontWeight: 'bold' }}>{equivalentCount}</span>{' '}
-                {equivalentItem}
-              </span>
-            </div>
+        {/* 健康周报通知（仅VIP和AI用户） */}
+            {(memberType === 'vip' || memberType === 'ai') && (
+              <button
+                onClick={onNavigateToHealthReport}
+                className="w-full rounded-xl p-3 mb-4 transition-all active:scale-98"
+                style={{
+                  background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)',
+                  border: 'none',
+                  boxShadow: '0 2px 8px rgba(255, 107, 107, 0.25)',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                    >
+                      <Bell className="w-4 h-4" style={{ color: '#FFFFFF' }} />
+                    </div>
+                    <div className="text-left">
+                      <div style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 'bold' }}>
+                        健康周报已生成
+                      </div>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '11px' }}>
+                        查看您的本周戒烟健康分析
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '12px' }}>
+                    查看 →
+                  </div>
+                </div>
+              </button>
+            )}
 
             {/* 视图切换 */}
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <ViewModeButton
-                label="日"
-                active={viewMode === 'day'}
-                onClick={() => setViewMode('day')}
-              />
-              <ViewModeButton
-                label="周"
-                active={viewMode === 'week'}
-                onClick={() => setViewMode('week')}
-              />
-              <ViewModeButton
-                label="月"
-                active={viewMode === 'month'}
-                onClick={() => setViewMode('month')}
-              />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <ViewModeButton
+                  label="日"
+                  active={viewMode === 'day'}
+                  onClick={() => setViewMode('day')}
+                />
+                <ViewModeButton
+                  label="周"
+                  active={viewMode === 'week'}
+                  onClick={() => setViewMode('week')}
+                />
+                <ViewModeButton
+                  label="月"
+                  active={viewMode === 'month'}
+                  onClick={() => setViewMode('month')}
+                />
+              </div>
+              <motion.button
+                onClick={() => {}}
+                className="relative flex items-center justify-center rounded-lg"
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(145deg, rgba(189, 189, 189, 0.15) 0%, rgba(189, 189, 189, 0.05) 100%)',
+                  border: '2px solid rgba(189, 189, 189, 0.3)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                }}
+                whileTap={{ scale: 0.85, rotate: 15 }}
+              >
+                <BrandLogo size={28} color="#BDBDBD" />
+              </motion.button>
             </div>
 
             {/* 烟瘾曲线 */}

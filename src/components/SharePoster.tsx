@@ -20,10 +20,16 @@ interface SharePosterProps {
     last7DaysCheckIn: boolean[]; // 最近7天的打卡情况，true表示已打卡
   };
   userRanking?: number; // 用户在全国的排名
+  memberType?: 'free' | 'vip' | 'ai'; // 用户会员类型
+  localRanking?: number; // 用户在街道/区的排名
+  localRegionName?: string; // 街道/区的名称
 }
 
-export default function SharePoster({ onBack, userStats, userRanking }: SharePosterProps) {
+export default function SharePoster({ onBack, userStats, userRanking, memberType = 'free', localRanking, localRegionName }: SharePosterProps) {
   const posterRef = useRef<HTMLDivElement>(null);
+
+  // 判断是否有VIP权限（VIP或AI会员）
+  const hasVIPAccess = memberType === 'vip' || memberType === 'ai';
 
   const handleDownload = () => {
     // In a real app, use html2canvas or similar to export the poster
@@ -188,7 +194,7 @@ export default function SharePoster({ onBack, userStats, userRanking }: SharePos
               </div>
 
               {/* 排行榜信息 */}
-              {userRanking && (
+              {hasVIPAccess ? (
                 <div 
                   className="rounded-xl p-3 mb-4 text-center"
                   style={{
@@ -197,10 +203,27 @@ export default function SharePoster({ onBack, userStats, userRanking }: SharePos
                   }}
                 >
                   <div style={{ color: '#2A2A2A', fontSize: '13px' }}>
-                    全国排名第 <span style={{ color: '#00B894', fontWeight: 'bold', fontSize: '16px' }}>{userRanking}</span> 名
+                    全国排名第 <span style={{ color: '#00B894', fontWeight: 'bold', fontSize: '16px' }}>{userRanking || '--'}</span> 名
                   </div>
                   <div style={{ color: '#666666', fontSize: '11px', marginTop: '4px' }}>
-                    已超越 <span style={{ fontWeight: 'bold' }}>{Math.max(0, Math.round((1 - userRanking / 1000) * 100))}%</span> 的用户
+                    已超越 <span style={{ fontWeight: 'bold' }}>{userRanking ? Math.max(0, Math.round((1 - userRanking / 1000) * 100)) : '--'}%</span> 的用户
+                  </div>
+                </div>
+              ) : (
+                <div 
+                  className="rounded-xl p-3 mb-4 text-center"
+                  style={{
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                  }}
+                >
+                  {localRanking && localRegionName && (
+                    <div style={{ color: '#2A2A2A', fontSize: '13px', marginBottom: '6px' }}>
+                      {localRegionName}排名第 <span style={{ color: '#F59E0B', fontWeight: 'bold', fontSize: '16px' }}>{localRanking}</span> 名
+                    </div>
+                  )}
+                  <div style={{ color: '#F59E0B', fontSize: '11px', fontWeight: 'bold' }}>
+                    🔒 全国排名未开通 · 开通VIP可查看
                   </div>
                 </div>
               )}
