@@ -1,4 +1,5 @@
-import { motion } from 'motion/react';
+import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, Award, Trophy, Medal, Crown, Star, Sparkles, Flame, Zap, Diamond } from 'lucide-react';
 import { Progress } from './ui/progress';
 import { RANK_SYSTEM } from '../utils/rankSystem';
@@ -18,6 +19,7 @@ export default function AchievementsPage({
   totalDays,
   consecutiveDays 
 }: AchievementsPageProps) {
+  const [showRulesModal, setShowRulesModal] = React.useState(false);
   // 段位徽章图标映射
   const rankIconMap: Record<string, any> = {
     '倔强青铜': Award,
@@ -72,11 +74,17 @@ export default function AchievementsPage({
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <button onClick={onBack} className="p-2 rounded-lg transition-all hover:bg-black/5" style={{ color: '#2A2A2A', backgroundColor: 'rgba(42, 42, 42, 0.08)' }}>
-            <ChevronLeft className="w-6 h-6" />
+          <button onClick={onBack} className="w-8 h-8 flex items-center justify-center" style={{ color: '#666666' }}>
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 style={{ color: '#2A2A2A', fontSize: '18px' }}>成就等级</h1>
-          <div className="w-10" />
+          <h1 style={{ color: '#2A2A2A', fontSize: '16px', fontWeight: 'bold' }}>成就等级</h1>
+          <button 
+            onClick={() => setShowRulesModal(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-full"
+            style={{ backgroundColor: 'rgba(0, 184, 148, 0.1)', color: '#00B894' }}
+          >
+            <span style={{ fontSize: '14px', fontWeight: 'bold' }}>?</span>
+          </button>
         </div>
 
         {/* Current Rank Card */}
@@ -247,6 +255,85 @@ export default function AchievementsPage({
           </div>
         </div>
       </div>
+
+      {/* Rules Modal */}
+      <AnimatePresence>
+        {showRulesModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowRulesModal(false)}
+          >
+            <div 
+              className="absolute inset-0 backdrop-blur-sm"
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+              style={{
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 style={{ color: '#2A2A2A', fontSize: '18px', fontWeight: 'bold' }}>成就规则说明</h3>
+                <button
+                  onClick={() => setShowRulesModal(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: '#F3F4F6', color: '#999999' }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h4 style={{ color: '#00B894', fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>
+                    段位晋升规则
+                  </h4>
+                  <div className="space-y-2 text-sm" style={{ color: '#666666', lineHeight: '1.6' }}>
+                    {RANK_SYSTEM.map((rank, index) => (
+                      <div key={rank.rank} className="flex items-start gap-2">
+                        <Star className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#00B894' }} />
+                        <span>
+                          <strong style={{ color: '#2A2A2A' }}>{rank.rank}</strong>：
+                          累计打卡 <strong style={{ fontWeight: 'bold' }}>{rank.minDays}</strong> 天
+                          {rank.stars && <span>（共{rank.stars}星）</span>}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t pt-4" style={{ borderColor: '#E5E7EB' }}>
+                  <h4 style={{ color: '#00B894', fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>
+                    连续打卡成就
+                  </h4>
+                  <p style={{ color: '#666666', fontSize: '13px', lineHeight: '1.6' }}>
+                    坚持连续打卡可获得专属成就徽章，每个成就都是对您毅力的见证。记得每天打卡，保持连续记录！
+                  </p>
+                </div>
+
+                <div className="border-t pt-4" style={{ borderColor: '#E5E7EB' }}>
+                  <h4 style={{ color: '#00B894', fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>
+                    补签卡说明
+                  </h4>
+                  <p style={{ color: '#666666', fontSize: '13px', lineHeight: '1.6' }}>
+                    • 每连续打卡<strong style={{ fontWeight: 'bold' }}>7天</strong>可获得<strong style={{ fontWeight: 'bold' }}>1张</strong>补签卡<br />
+                    • 新用户初始赠送<strong style={{ fontWeight: 'bold' }}>3张</strong>补签卡<br />
+                    • 补签卡可用于补签断签日期，保持连续记录
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
-import { Star } from 'lucide-react';
+import { Star, ChevronRight } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 import EquivalentItemIcon from './EquivalentItemIcon';
 import { toast } from 'sonner@2.0.3';
@@ -25,14 +25,17 @@ interface UserStats {
   nextRank: string;
   consecutiveTarget: number;
   makeupCards: number;
+  regionName?: string; // 区域名称，如"朝阳区"
+  regionRank?: number; // 区域排名
 }
 
 interface HomePageProps {
   userStats: UserStats;
-  onNavigate: (page: 'achievements' | 'calendar' | 'share' | 'report' | 'settings') => void;
+  onNavigate: (page: 'achievements' | 'calendar' | 'share' | 'report' | 'settings' | 'ranking') => void;
   onCheckIn: () => void;
   hasCheckedInToday: boolean;
   onCravingRecord: () => void;
+  hasAIAccess?: boolean; // 是否有AI权限
 }
 
 function ZXOIcon({ onCravingRecord, hasCheckedInToday, onNavigateToReport }: { onCravingRecord: () => void; hasCheckedInToday: boolean; onNavigateToReport: () => void }) {
@@ -138,7 +141,7 @@ function ZXOIcon({ onCravingRecord, hasCheckedInToday, onNavigateToReport }: { o
   );
 }
 
-export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedInToday, onCravingRecord }: HomePageProps) {
+export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedInToday, onCravingRecord, hasAIAccess = false }: HomePageProps) {
   const [hasError, setHasError] = useState(false);
 
   const handleCheckIn = () => {
@@ -153,7 +156,7 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
 
   const handleButtonClick = () => {
     if (hasCheckedInToday) {
-      onNavigate('share');
+      onNavigate('ranking');
     } else {
       handleCheckIn();
     }
@@ -170,7 +173,10 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
         {/* Header: Avatar + Nickname + Rank + Brand Icon */}
         <div className="flex items-start justify-between mb-8">
           <div className="flex items-start gap-3">
-            <button onClick={() => onNavigate('settings')} style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+            <button 
+              onClick={() => onNavigate('settings')} 
+              style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+            >
               <Avatar className="w-12 h-12 ring-2 ring-offset-2 ring-offset-transparent" style={{ ringColor: '#00B894' }}>
                 <AvatarImage src={userStats.avatar} />
                 <AvatarFallback style={{ backgroundColor: '#00B894', color: '#EFEFEF' }}>
@@ -179,13 +185,29 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
               </Avatar>
             </button>
             <div className="flex-1">
-              <div style={{ color: '#2A2A2A' }} className="mb-1 truncate">{userStats.nickname}</div>
+              <div className="flex items-center gap-2 mb-1">
+                <span style={{ color: '#2A2A2A' }} className="truncate">{userStats.nickname}</span>
+                {/* VIP 会员图标 */}
+                <div 
+                  className="px-2 py-0.5 rounded text-[10px]"
+                  style={{ 
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    color: '#F59E0B',
+                    fontWeight: 'bold',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                  }}
+                >
+                  VIP
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <button 
-                  onClick={() => onNavigate('achievements')}
+                  onClick={() => onNavigate('ranking')}
                   className="flex items-center gap-1 px-2 py-0.5 rounded transition-all hover:opacity-80" 
                   style={{ backgroundColor: 'rgba(0, 184, 148, 0.2)', border: '1px solid rgba(0, 184, 148, 0.3)', cursor: 'pointer' }}
                 >
+                  <span style={{ color: '#00B894', fontSize: '11px' }}>{userStats.regionName || '朝阳区'}第<span style={{ fontWeight: 'bold' }}>{userStats.regionRank || 5}</span>名</span>
+                  <span style={{ color: 'rgba(0, 184, 148, 0.5)', fontSize: '11px' }}>·</span>
                   <Star className="w-3 h-3" style={{ color: '#00B894' }} fill="#00B894" />
                   <span style={{ color: '#00B894', fontSize: '13px' }}>{userStats.currentRank} <span style={{ fontWeight: 'bold' }}>{userStats.rankStars}</span>星</span>
                 </button>
@@ -271,20 +293,53 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
           </div>
         </div>
 
+        {/* AI 戒烟助手 */}
+        <button
+          onClick={() => onNavigate('aiChat')}
+          className="w-full rounded-xl p-4 mb-6 transition-all active:scale-98"
+          style={{ 
+            background: 'linear-gradient(135deg, #667EEA 0%, #764BA2 100%)',
+            border: 'none',
+            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+              >
+                <span style={{ fontSize: '20px' }}>🤖</span>
+              </div>
+              <div className="text-left">
+                <div style={{ color: '#FFFFFF', fontSize: '15px', fontWeight: 'bold', marginBottom: '2px' }}>
+                  AI 戒烟助手
+                </div>
+                <div style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '12px' }}>
+                  专业戒烟指导，随时陪伴您
+                </div>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.8)' }} />
+          </div>
+        </button>
+
         {/* Check-in / Share Button */}
         <div className="mb-6">
           <Button
-            onClick={handleButtonClick}
+            onClick={hasCheckedInToday ? undefined : handleButtonClick}
             className="w-full h-14 rounded-xl"
             style={{
-              backgroundColor: hasCheckedInToday ? '#00B894' : '#00B894',
+              backgroundColor: hasCheckedInToday ? '#CCCCCC' : '#00B894',
               color: '#FFFFFF',
               border: 'none',
-              boxShadow: '0 4px 20px rgba(0, 184, 148, 0.4)',
-              cursor: 'pointer',
+              boxShadow: hasCheckedInToday ? 'none' : '0 4px 20px rgba(0, 184, 148, 0.4)',
+              cursor: hasCheckedInToday ? 'not-allowed' : 'pointer',
+              opacity: hasCheckedInToday ? 0.6 : 1,
             }}
+            disabled={hasCheckedInToday}
           >
-            {hasCheckedInToday ? '分享' : '今日打卡'}
+            {hasCheckedInToday ? '已打卡' : '今日打卡'}
           </Button>
           
           {/* Status Message */}
@@ -306,5 +361,3 @@ export default function HomePage({ userStats, onNavigate, onCheckIn, hasCheckedI
     </div>
   );
 }
-
-

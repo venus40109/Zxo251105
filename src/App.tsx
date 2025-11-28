@@ -7,6 +7,9 @@ import CheckInCalendar from './components/CheckInCalendar';
 import SharePoster from './components/SharePoster';
 import DataReportPage from './components/DataReportPage';
 import SettingsPage from './components/SettingsPage';
+import RankingPage from './components/RankingPage';
+import HealthReportPage from './components/HealthReportPage';
+import AIAssistantPage from './components/AIAssistantPage';
 import { getRankByDays, getNextRank } from './utils/rankSystem';
 import { calculateEquivalentItem } from './utils/equivalentItems';
 import { toast, Toaster } from 'sonner@2.0.3';
@@ -42,6 +45,8 @@ interface UserData {
   lastCheckInDate: string | null;
   lastCravingTime: number | null;
   hasAgreedToTerms: boolean;
+  memberType: 'free' | 'vip' | 'ai';
+  aiExpiryDate?: string | null; // AI权限到期日期
 }
 
 interface UserStats {
@@ -63,9 +68,11 @@ interface UserStats {
   consecutiveTarget: number;
   makeupCards: number;
   last7DaysCheckIn: boolean[];
+  regionName?: string;
+  regionRank?: number;
 }
 
-type Page = 'splash' | 'home' | 'achievements' | 'calendar' | 'share' | 'report' | 'settings' | 'setup';
+type Page = 'splash' | 'home' | 'achievements' | 'calendar' | 'share' | 'report' | 'settings' | 'setup' | 'ranking' | 'healthReport' | 'aiChat';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
@@ -83,6 +90,8 @@ export default function App() {
     lastCheckInDate: null,
     lastCravingTime: null, // 上次记录烟瘾的时间
     hasAgreedToTerms: false, // 是否同意协议
+    memberType: 'free', // 当前会员类型
+    aiExpiryDate: null, // AI权限到期日期
   });
 
   // 检查今天是否已打卡
@@ -145,7 +154,9 @@ export default function App() {
       nextRank: nextRankInfo.nextRank,
       consecutiveTarget: consecutiveDays + 1,
       makeupCards,
-      last7DaysCheckIn
+      last7DaysCheckIn,
+      regionName: '朝阳区',
+      regionRank: 5
     };
   };
 
@@ -403,7 +414,7 @@ export default function App() {
     return true;
   };
 
-  const handleNavigate = (page: 'achievements' | 'calendar' | 'share' | 'report' | 'settings') => {
+  const handleNavigate = (page: 'achievements' | 'calendar' | 'share' | 'report' | 'settings' | 'ranking') => {
     setCurrentPage(page);
   };
 
@@ -413,6 +424,36 @@ export default function App() {
       ...prev,
       setupData: data,
     }));
+  };
+
+  // 修改会员类型（通过兑换码）
+  const handleChangeMemberType = (type: 'free' | 'vip' | 'ai') => {
+    let aiExpiryDate = null;
+    if (type === 'vip') {
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 4);
+      aiExpiryDate = expiryDate.toISOString();
+    } else if (type === 'ai') {
+      const expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + 3);
+      aiExpiryDate = expiryDate.toISOString();
+    }
+    
+    setUserData(prev => ({
+      ...prev,
+      memberType: type,
+      aiExpiryDate,
+    }));
+    
+    const messages = {
+      free: '已切换为普通用户',
+      vip: '已切换为VIP会员（含4天AI体验）',
+      ai: '已切换为AI戒烟军师',
+    };
+    
+    toast.custom(() => (
+      <CustomToast message={messages[type]} />
+    ), { duration: 2000 });
   };
 
   // 记录烟瘾
@@ -478,6 +519,7 @@ export default function App() {
           onCheckIn={() => handleCheckIn(false)}
           hasCheckedInToday={hasCheckedInToday}
           onCravingRecord={handleCravingRecord}
+          hasAIAccess={userData.memberType === 'ai' || (userData.memberType === 'vip' && userData.aiExpiryDate && new Date(userData.aiExpiryDate) > new Date())}
         />
       );
     
@@ -513,7 +555,7 @@ export default function App() {
       );
     
     case 'share':
-      return <SharePoster onBack={handleBack} userStats={userStats} />;
+      return <SharePoster onBack={handleBack} userStats={userStats} userRanking={userStats.totalDays > 0 ? Math.floor(Math.random() * 500) + 1 : undefined} />;
     
     case 'report':
       return (
@@ -538,9 +580,48 @@ export default function App() {
           onUpdateSetupData={handleUpdateSetupData}
           currentRank={userStats.currentRank}
           rankStars={userStats.rankStars}
+          currentMemberType={userData.memberType}
+          onChangeMemberType={handleChangeMemberType}
+          onViewHealthReport={() => setCurrentPage('healthReport')}
         />
       );
     
+    case 'ranking':
+      return (
+        <RankingPage
+          onBack={handleBack}
+          currentUserNickname={userData.nickname}
+          currentUserAvatar={userData.avatar}
+          currentUserTotalDays={userStats.totalDays}
+          onNavigateToShare={() => setCurrentPage('share')}
+          onNavigateToSettings={() => setCurrentPage('settings')}
+          isVIP={userData.memberType === 'vip' || userData.memberType === 'ai'}
+          memberType={userData.memberType}
+        />
+      );
+    
+    case 'healthReport':
+      return (
+        <HealthReportPage
+          onBack={handleBack}
+          cravingRecords={userData.cravingRecords}
+          last7DaysCheckIn={userStats.last7DaysCheckIn}
+          smokingYears={userData.setupData?.smokingYears || '0'}
+          dailyAmount={userData.setupData?.dailyAmount || 0}
+          pricePerPack={userData.setupData?.pricePerPack || 0}
+          cigarettesPerPack={userData.setupData?.cigarettesPerPack || 20}
+        />
+      );
+    
+    case 'aiChat':
+      return (
+        <AIAssistantPage
+          onBack={handleBack}
+          hasAIAccess={userData.memberType === 'ai' || (userData.memberType === 'vip' && userData.aiExpiryDate && new Date(userData.aiExpiryDate) > new Date())}
+          onNavigateToSettings={() => setCurrentPage('settings')}
+        />
+      );
+
     default:
       return (
         <HomePage 

@@ -19,9 +19,10 @@ interface SharePosterProps {
     rankStars: number;
     last7DaysCheckIn: boolean[]; // 最近7天的打卡情况，true表示已打卡
   };
+  userRanking?: number; // 用户在全国的排名
 }
 
-export default function SharePoster({ onBack, userStats }: SharePosterProps) {
+export default function SharePoster({ onBack, userStats, userRanking }: SharePosterProps) {
   const posterRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = () => {
@@ -63,22 +64,21 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
       <div className="max-w-md mx-auto w-full flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <button onClick={onBack} className="p-2 rounded-lg transition-all hover:bg-black/5" style={{ color: '#2A2A2A', backgroundColor: 'rgba(42, 42, 42, 0.08)' }}>
-            <ChevronLeft className="w-6 h-6" />
+          <button onClick={onBack} className="w-8 h-8 flex items-center justify-center" style={{ color: '#666666' }}>
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 style={{ color: '#2A2A2A', fontSize: '18px' }}>分享海报</h1>
-          <div className="w-10" />
+          <h1 style={{ color: '#2A2A2A', fontSize: '16px', fontWeight: 'bold' }}>分享海报</h1>
+          <div className="w-8" />
         </div>
 
         {/* Poster Preview */}
         <motion.div
           ref={posterRef}
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="rounded-2xl overflow-hidden flex-1"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex-1"
           style={{
             backgroundColor: '#EFEFEF',
-            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.5)',
             minHeight: 0,
           }}
         >
@@ -98,30 +98,6 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
                   戒烟打卡
                 </div>
               </div>
-            </div>
-
-            {/* 右上角功能图标 */}
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-              <button 
-                onClick={handleDownload}
-                className="p-2 rounded-lg transition-colors hover:opacity-70"
-                style={{ 
-                  color: '#2A2A2A',
-                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                }}
-              >
-                <Download className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={handleShare}
-                className="p-2 rounded-lg transition-colors hover:opacity-70"
-                style={{ 
-                  color: '#2A2A2A',
-                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                }}
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
             </div>
 
             {/* 中间内容 */}
@@ -211,35 +187,23 @@ export default function SharePoster({ onBack, userStats }: SharePosterProps) {
                 </div>
               </div>
 
-              {/* 7天打卡情况 */}
-              <div 
-                className="rounded-xl p-4 mb-4"
-                style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.03)',
-                  border: '1px solid rgba(0, 0, 0, 0.08)',
-                }}
-              >
-                <div className="flex justify-between">
-                  {userStats.last7DaysCheckIn.map((checked, index) => (
-                    <div key={index} className="flex flex-col items-center">
-                      <div style={{ color: '#888888', fontSize: '11px', marginBottom: '6px' }}>
-                        {reorderedLabels[index]}
-                      </div>
-                      <div
-                        className="rounded-full flex items-center justify-center"
-                        style={{
-                          width: '32px',
-                          height: '32px',
-                          backgroundColor: checked ? '#00B894' : '#FFFFFF',
-                          border: checked ? 'none' : '1px solid rgba(0, 0, 0, 0.15)',
-                        }}
-                      >
-                        {checked && <Check className="w-4 h-4" style={{ color: '#FFFFFF', strokeWidth: 3 }} />}
-                      </div>
-                    </div>
-                  ))}
+              {/* 排行榜信息 */}
+              {userRanking && (
+                <div 
+                  className="rounded-xl p-3 mb-4 text-center"
+                  style={{
+                    backgroundColor: 'rgba(0, 184, 148, 0.1)',
+                    border: '1px solid rgba(0, 184, 148, 0.3)',
+                  }}
+                >
+                  <div style={{ color: '#2A2A2A', fontSize: '13px' }}>
+                    全国排名第 <span style={{ color: '#00B894', fontWeight: 'bold', fontSize: '16px' }}>{userRanking}</span> 名
+                  </div>
+                  <div style={{ color: '#666666', fontSize: '11px', marginTop: '4px' }}>
+                    已超越 <span style={{ fontWeight: 'bold' }}>{Math.max(0, Math.round((1 - userRanking / 1000) * 100))}%</span> 的用户
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Slogan */}
               <div className="text-center mb-3">

@@ -46,14 +46,13 @@ export default function DataReportPage({
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 p-2 rounded-lg transition-all hover:bg-black/5"
-            style={{ color: '#2A2A2A', backgroundColor: 'rgba(42, 42, 42, 0.08)', border: 'none', cursor: 'pointer' }}
+            className="w-8 h-8 flex items-center justify-center"
+            style={{ color: '#666666' }}
           >
             <ChevronLeft className="w-5 h-5" />
-            <span>返回</span>
           </button>
-          <div style={{ color: '#2A2A2A' }}>数据报告</div>
-          <div style={{ width: '60px' }}></div>
+          <h1 style={{ color: '#2A2A2A', fontSize: '16px', fontWeight: 'bold' }}>数据报告</h1>
+          <div className="w-8"></div>
         </div>
 
         {/* 核心指标看板 */}
